@@ -16,207 +16,238 @@ body{background:#0B0E11;color:#E8EDF5;font-family:system-ui,sans-serif;font-size
 input[type=file]{display:none}
 select option{background:#151921}
 .row{background:#151921;border:1px solid #252D3A;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:6px}
-.toast{position:fixed;top:16px;right:16px;left:16px;z-index:999;border-radius:10px;padding:12px 16px;font-weight:600;font-size:14px;display:none;text-align:center}
-.check{width:22px;height:22px;border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+.row:hover{background:#1C2333}
+.toast{position:fixed;top:16px;right:16px;left:16px;z-index:9999;border-radius:10px;padding:12px 16px;font-weight:600;font-size:14px;display:none;text-align:center}
+.chk{width:22px;height:22px;border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+/* Layout */
+.main-layout{display:flex;min-height:100vh}
+/* Sidebar */
+.sidebar{width:64px;flex-shrink:0;background:#151921;border-right:1px solid #252D3A;display:flex;flex-direction:column;align-items:center;padding:14px 8px;gap:6px;position:sticky;top:0;height:100vh;z-index:50}
+.nb{width:44px;height:44px;border-radius:11px;border:1px solid transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;background:transparent;font-size:18px;transition:all .15s;color:#8896AA;gap:2px;font-family:inherit}
+.nb span.nl{font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.nb:hover{background:#1C2333;color:#E8EDF5}
+.nb.on{background:var(--jcol,#3772FF)1C;border-color:var(--jcol,#3772FF);color:var(--jcol,#3772FF)}
+/* Content */
+.ct{flex:1;overflow-y:auto;display:flex;flex-direction:column;min-width:0}
+.hdr{background:rgba(11,14,17,.92);backdrop-filter:blur(12px);border-bottom:1px solid #252D3A;padding:13px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:40}
+.sc-area{padding:16px;max-width:620px;width:100%}
+/* Charts */
+.chart-wrap{width:100%;overflow:hidden;border-radius:10px;background:#0C1017;padding:10px 0 0}
 </style>
 </head>
 <body>
-
 <div id="toast" class="toast"></div>
 
-<!-- PAGE ACCUEIL -->
+<!-- ACCUEIL -->
 
 <div id="p-home" class="page show">
   <div style="background:#151921;border-bottom:1px solid #252D3A;padding:16px 20px;display:flex;align-items:center;gap:12px">
     <span style="font-size:24px">📈</span>
     <div>
-      <div style="font-weight:800;font-size:16px">FOREX JOURNAL</div>
+      <div style="font-weight:800;font-size:17px">FOREX JOURNAL</div>
       <div style="font-size:11px;color:#8896AA">by Petit Médée</div>
     </div>
   </div>
-  <div style="padding:24px 16px;max-width:500px;margin:0 auto">
-    <h2 style="font-size:22px;font-weight:800;margin-bottom:6px">Vos Journaux</h2>
+  <div style="padding:24px 16px;max-width:520px;margin:0 auto">
+    <h2 style="font-size:22px;font-weight:800;margin-bottom:4px">Vos Journaux</h2>
     <p style="color:#8896AA;margin-bottom:20px;font-size:14px">3 espaces indépendants</p>
-    <div id="journal-list"></div>
+    <div id="home-list"></div>
   </div>
 </div>
 
-<!-- PAGE JOURNAL -->
+<!-- JOURNAL (sidebar + content) -->
 
 <div id="p-journal" class="page">
-  <!-- Barre nav bas -->
-  <div style="position:fixed;bottom:0;left:0;right:0;background:#151921;border-top:1px solid #252D3A;display:flex;z-index:100">
-    <button onclick="showTab('dash')" id="tab-dash" style="flex:1;padding:12px 4px;background:transparent;border:none;cursor:pointer;font-size:10px;color:#8896AA;font-family:inherit">
-      <div style="font-size:20px">📊</div>Dashboard
-    </button>
-    <button onclick="showTab('add')" id="tab-add" style="flex:1;padding:12px 4px;background:transparent;border:none;cursor:pointer;font-size:10px;color:#8896AA;font-family:inherit">
-      <div style="font-size:20px">➕</div>Nouveau
-    </button>
-    <button onclick="showTab('hist')" id="tab-hist" style="flex:1;padding:12px 4px;background:transparent;border:none;cursor:pointer;font-size:10px;color:#8896AA;font-family:inherit">
-      <div style="font-size:20px">📋</div>Historique
-    </button>
-    <button onclick="showTab('cfg')" id="tab-cfg" style="flex:1;padding:12px 4px;background:transparent;border:none;cursor:pointer;font-size:10px;color:#8896AA;font-family:inherit">
-      <div style="font-size:20px">⚙️</div>Paramètres
-    </button>
-  </div>
-
-  <!-- Header journal -->
-
-  <div id="j-header" style="background:#151921;border-bottom:1px solid #252D3A;padding:14px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50">
-    <button onclick="goHome()" style="background:transparent;border:1px solid #252D3A;border-radius:8px;padding:6px 12px;color:#8896AA;cursor:pointer;font-family:inherit;font-size:13px">‹ Retour</button>
-    <span id="j-emoji" style="font-size:22px">📘</span>
-    <span id="j-name" style="font-weight:700;font-size:16px"></span>
-  </div>
-
-  <!-- Contenu tabs -->
-
-  <div style="padding:16px 16px 80px;max-width:600px;margin:0 auto">
+  <div class="main-layout">
+    <!-- Sidebar -->
+    <nav id="sidebar" class="sidebar">
+      <button onclick="goHome()" class="nb" title="Retour" style="margin-bottom:8px;font-size:20px">‹</button>
+      <div id="sb-emo" style="width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:8px;flex-shrink:0"></div>
+      <div style="width:30px;height:1px;background:#252D3A;margin-bottom:4px"></div>
+      <button class="nb on" id="nb-dash" onclick="showTab('dash')" title="Dashboard"><span>📊</span><span class="nl">Board</span></button>
+      <button class="nb" id="nb-add" onclick="showTab('add')" title="Nouveau"><span>➕</span><span class="nl">Trade</span></button>
+      <button class="nb" id="nb-hist" onclick="showTab('hist')" title="Historique"><span>📋</span><span class="nl">Histor.</span></button>
+      <button class="nb" id="nb-cfg" onclick="showTab('cfg')" title="Paramètres"><span>⚙️</span><span class="nl">Config</span></button>
+      <div style="flex:1"></div>
+      <div id="notion-dot" title="Notion" style="width:10px;height:10px;border-radius:50%;background:#3D4D63;margin-bottom:4px"></div>
+    </nav>
+    <!-- Content -->
+    <div class="ct">
+      <div class="hdr">
+        <span id="hdr-emo" style="font-size:20px">📘</span>
+        <span id="hdr-name" style="font-weight:700;font-size:16px"></span>
+        <span id="hdr-title" style="color:#8896AA;margin-left:4px"></span>
+        <button onclick="showTab('add')" id="btn-new" class="btn" style="margin-left:auto;font-size:13px;padding:9px 16px">＋ Nouveau</button>
+      </div>
+      <div class="sc-area">
 
 ```
-<!-- DASHBOARD -->
-<div id="t-dash" class="page show">
-  <div id="dash-stats" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px"></div>
-  <div id="dash-trades"></div>
-</div>
-
-<!-- NOUVEAU TRADE -->
-<div id="t-add" class="page">
-  <h3 id="form-title" style="font-size:17px;font-weight:700;margin-bottom:16px">Nouveau Trade</h3>
-
-  <div class="card" style="margin-bottom:12px">
-    <div style="font-size:12px;font-weight:700;color:#3772FF;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">📌 Base</div>
-    <label class="lbl">Paire *</label>
-    <select id="f-pair" class="inp" style="margin-bottom:10px;cursor:pointer">
-      <option>EUR/USD</option><option>GBP/USD</option><option>USD/JPY</option>
-      <option>USD/CHF</option><option>AUD/USD</option><option>USD/CAD</option>
-      <option>NZD/USD</option><option>EUR/GBP</option><option>EUR/JPY</option>
-      <option>GBP/JPY</option><option>CHF/JPY</option><option>XAU/USD (GOLD)</option>
-    </select>
-    <label class="lbl">Direction *</label>
-    <div style="display:flex;gap:8px">
-      <button id="btn-buy" onclick="setDir('BUY')" style="flex:1;padding:10px;border-radius:8px;cursor:pointer;font-weight:700;font-size:14px;font-family:inherit;background:#00C0871E;border:1px solid #00C087;color:#00C087">▲ BUY</button>
-      <button id="btn-sell" onclick="setDir('SELL')" style="flex:1;padding:10px;border-radius:8px;cursor:pointer;font-weight:700;font-size:14px;font-family:inherit;background:#0C1017;border:1px solid #252D3A;color:#8896AA">▼ SELL</button>
+    <!-- DASHBOARD -->
+    <div id="t-dash" class="page show">
+      <div id="dash-stats" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px"></div>
+      <!-- Chart -->
+      <div class="card" style="margin-bottom:14px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:#8896AA;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">📈 Courbe de Capital</div>
+        <div id="chart-container" style="width:100%;height:120px"></div>
+      </div>
+      <!-- Barres -->
+      <div class="card" style="margin-bottom:14px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:#8896AA;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">📊 P&L par Trade</div>
+        <div id="bar-container" style="width:100%;height:80px"></div>
+      </div>
+      <div id="dash-trades"></div>
     </div>
-  </div>
 
-  <div class="card" style="margin-bottom:12px">
-    <div style="font-size:12px;font-weight:700;color:#3772FF;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">📅 Dates</div>
-    <label class="lbl">Date d'Entrée *</label>
-    <input type="datetime-local" id="f-entry" class="inp" style="margin-bottom:10px" oninput="onEntryDate()"/>
-    <label class="lbl">Date de Sortie</label>
-    <input type="datetime-local" id="f-exit" class="inp" oninput="onExitDate()"/>
-    <div id="session-box" style="display:none;margin-top:10px;background:#3772FF0D;border:1px solid #3772FF28;border-radius:8px;padding:10px 13px">
-      <div style="font-size:10px;font-weight:700;color:#3772FF;text-transform:uppercase;margin-bottom:2px">Session</div>
-      <div id="session-val" style="font-size:14px;font-weight:600"></div>
-    </div>
-    <div id="dur-box" style="display:none;margin-top:8px;background:#F5A6230D;border:1px solid #F5A62328;border-radius:8px;padding:10px 13px">
-      <div style="font-size:10px;font-weight:700;color:#F5A623;text-transform:uppercase;margin-bottom:2px">Durée</div>
-      <div id="dur-val" style="font-size:14px;font-weight:600"></div>
-    </div>
-  </div>
+    <!-- NOUVEAU TRADE -->
+    <div id="t-add" class="page">
+      <h3 id="form-title" style="font-size:17px;font-weight:700;margin-bottom:14px">Nouveau Trade</h3>
 
-  <div class="card" style="margin-bottom:12px">
-    <div style="font-size:12px;font-weight:700;color:#3772FF;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">💰 Performance</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-      <div><label class="lbl">Risque %</label><input type="number" id="f-risk" class="inp" placeholder="1.0"/></div>
-      <div><label class="lbl">P&L %</label><input type="number" id="f-pnl" class="inp" placeholder="+2.5"/></div>
-      <div><label class="lbl">P&L $</label><input type="number" id="f-amt" class="inp" placeholder="250"/></div>
-    </div>
-  </div>
+      <div class="card" style="margin-bottom:10px">
+        <div id="sc1-title" class="sct" style="margin-bottom:12px">📌 Base</div>
+        <label class="lbl">Paire *</label>
+        <select id="f-pair" class="inp" style="margin-bottom:10px;cursor:pointer">
+          <option>EUR/USD</option><option>GBP/USD</option><option>USD/JPY</option>
+          <option>USD/CHF</option><option>AUD/USD</option><option>USD/CAD</option>
+          <option>NZD/USD</option><option>EUR/GBP</option><option>EUR/JPY</option>
+          <option>GBP/JPY</option><option>CHF/JPY</option><option>XAU/USD (GOLD)</option>
+        </select>
+        <label class="lbl">Direction *</label>
+        <div style="display:flex;gap:8px">
+          <button id="btn-buy" onclick="setDir('BUY')" style="flex:1;padding:10px;border-radius:8px;cursor:pointer;font-weight:700;font-size:14px;font-family:inherit;background:#00C0871E;border:1px solid #00C087;color:#00C087">▲ BUY</button>
+          <button id="btn-sell" onclick="setDir('SELL')" style="flex:1;padding:10px;border-radius:8px;cursor:pointer;font-weight:700;font-size:14px;font-family:inherit;background:#0C1017;border:1px solid #252D3A;color:#8896AA">▼ SELL</button>
+        </div>
+      </div>
 
-  <div class="card" style="margin-bottom:12px">
-    <div style="font-size:12px;font-weight:700;color:#3772FF;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">🧠 Stratégie</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-      <div><label class="lbl">Stratégie</label>
-        <select id="f-strat" class="inp" style="cursor:pointer">
-          <option value="">— Choisir —</option>
-          <option>Continuation</option><option>Retournement</option>
+      <div class="card" style="margin-bottom:10px">
+        <div class="sct" style="margin-bottom:12px">📅 Dates</div>
+        <label class="lbl">Date d'Entrée *</label>
+        <input type="datetime-local" id="f-entry" class="inp" style="margin-bottom:10px" oninput="onEntryDate()"/>
+        <label class="lbl">Date de Sortie</label>
+        <input type="datetime-local" id="f-exit" class="inp" oninput="onExitDate()"/>
+        <div id="session-box" style="display:none;margin-top:10px;border-radius:8px;padding:10px 13px">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;margin-bottom:2px">Session</div>
+          <div id="session-val" style="font-size:14px;font-weight:600"></div>
+        </div>
+        <div id="dur-box" style="display:none;margin-top:8px;background:#F5A6230D;border:1px solid #F5A62328;border-radius:8px;padding:10px 13px">
+          <div style="font-size:10px;font-weight:700;color:#F5A623;text-transform:uppercase;margin-bottom:2px">Durée</div>
+          <div id="dur-val" style="font-size:14px;font-weight:600"></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:10px">
+        <div class="sct" style="margin-bottom:12px">💰 Performance</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          <div><label class="lbl">Risque %</label><input type="number" id="f-risk" class="inp" placeholder="1.0"/></div>
+          <div><label class="lbl">P&L %</label><input type="number" id="f-pnl" class="inp" placeholder="+2.5"/></div>
+          <div><label class="lbl">P&L $</label><input type="number" id="f-amt" class="inp" placeholder="250"/></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:10px">
+        <div class="sct" style="margin-bottom:12px">🧠 Stratégie & Psychologie</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+          <div><label class="lbl">Stratégie</label>
+            <select id="f-strat" class="inp" style="cursor:pointer">
+              <option value="">— Choisir —</option>
+              <option>Continuation</option><option>Retournement</option>
+            </select>
+          </div>
+          <div><label class="lbl">Émotion</label>
+            <select id="f-emo" class="inp" style="cursor:pointer">
+              <option value="">— Choisir —</option>
+              <option>😎 Confiant</option><option>😐 Neutre</option><option>😰 Stressé</option>
+              <option>🤑 Euphorique</option><option>😨 Craintif</option><option>😤 Frustré</option>
+              <option>🧘 Discipliné</option><option>😴 Fatigué</option>
+            </select>
+          </div>
+        </div>
+        <label class="lbl" style="margin-bottom:8px">Confluences</label>
+        <div id="conf-list"></div>
+        <div id="score-box" style="display:none;border-radius:8px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <span style="font-size:12px;color:#8896AA">Score de confluences</span>
+          <span id="score-val" style="font-size:14px;font-weight:700"></span>
+        </div>
+        <label class="lbl">Notes</label>
+        <textarea id="f-notes" class="inp" rows="3" placeholder="Leçons apprises..." style="resize:vertical;line-height:1.6"></textarea>
+      </div>
+
+      <div class="card" style="margin-bottom:10px">
+        <div class="sct" style="margin-bottom:12px">📸 Captures d'Écran</div>
+        <input type="file" id="fe" accept="image/*" onchange="pickImg('fe','e')"/>
+        <input type="file" id="fs" accept="image/*" onchange="pickImg('fs','s')"/>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div>
+            <label class="lbl" style="color:#00C087">Entrée</label>
+            <button onclick="document.getElementById('fe').click()" style="width:100%;background:#0C1017;border:1.5px dashed #00C08738;border-radius:10px;padding:16px;cursor:pointer;color:#8896AA;font-family:inherit;font-size:13px">📷<br><span id="fe-name">Ajouter</span></button>
+            <img id="fe-img" style="display:none;width:100%;border-radius:8px;margin-top:8px;max-height:140px;object-fit:contain"/>
+          </div>
+          <div>
+            <label class="lbl" style="color:#EF454A">Sortie</label>
+            <button onclick="document.getElementById('fs').click()" style="width:100%;background:#0C1017;border:1.5px dashed #EF454A38;border-radius:10px;padding:16px;cursor:pointer;color:#8896AA;font-family:inherit;font-size:13px">📷<br><span id="fs-name">Ajouter</span></button>
+            <img id="fs-img" style="display:none;width:100%;border-radius:8px;margin-top:8px;max-height:140px;object-fit:contain"/>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;padding-bottom:20px">
+        <button onclick="cancelForm()" class="btn" style="background:#252D3A;color:#8896AA;flex:1">Annuler</button>
+        <button onclick="submitForm()" id="submit-btn" class="btn" style="flex:2">💾 Enregistrer</button>
+      </div>
+    </div>
+
+    <!-- HISTORIQUE -->
+    <div id="t-hist" class="page">
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <select id="flt-pair" class="inp" style="width:auto;padding:8px 10px;font-size:13px;cursor:pointer;flex:1;min-width:120px" onchange="renderHist()">
+          <option value="">Toutes paires</option>
+          <option>EUR/USD</option><option>GBP/USD</option><option>USD/JPY</option>
+          <option>USD/CHF</option><option>AUD/USD</option><option>USD/CAD</option>
+          <option>NZD/USD</option><option>EUR/GBP</option><option>EUR/JPY</option>
+          <option>GBP/JPY</option><option>CHF/JPY</option><option>XAU/USD (GOLD)</option>
+        </select>
+        <select id="flt-dir" class="inp" style="width:auto;padding:8px 10px;font-size:13px;cursor:pointer;flex:1;min-width:100px" onchange="renderHist()">
+          <option value="">Direction</option><option>BUY</option><option>SELL</option>
+        </select>
+        <select id="flt-str" class="inp" style="width:auto;padding:8px 10px;font-size:13px;cursor:pointer;flex:1;min-width:120px" onchange="renderHist()">
+          <option value="">Stratégie</option><option>Continuation</option><option>Retournement</option>
+        </select>
+        <select id="flt-ses" class="inp" style="width:auto;padding:8px 10px;font-size:13px;cursor:pointer;flex:1;min-width:120px" onchange="renderHist()">
+          <option value="">Session</option>
+          <option>🇯🇵 Tokyo</option>
+          <option>🇬🇧 Londres</option>
+          <option>🇺🇸 New York</option>
+          <option>🔀 Overlap Tokyo/Londres</option>
+          <option>🔀 Overlap Londres/NY</option>
+          <option>🌙 Creux</option>
         </select>
       </div>
-      <div><label class="lbl">Émotion</label>
-        <select id="f-emo" class="inp" style="cursor:pointer">
-          <option value="">— Choisir —</option>
-          <option>😎 Confiant</option><option>😐 Neutre</option><option>😰 Stressé</option>
-          <option>🤑 Euphorique</option><option>😨 Craintif</option><option>😤 Frustré</option>
-          <option>🧘 Discipliné</option><option>😴 Fatigué</option>
-        </select>
+      <div id="hist-count" style="font-size:12px;color:#8896AA;margin-bottom:10px"></div>
+      <div id="hist-list"></div>
+    </div>
+
+    <!-- PARAMÈTRES -->
+    <div id="t-cfg" class="page">
+      <div class="card" style="margin-bottom:12px">
+        <div class="sct" style="margin-bottom:12px">🔗 Connexion Notion</div>
+        <div id="notion-status" style="border-radius:8px;padding:10px 13px;margin-bottom:12px;font-size:13px;font-weight:600"></div>
+        <label class="lbl">Token d'intégration</label>
+        <input type="password" id="cfg-nt" class="inp" placeholder="secret_xxxxxxxxxxxx" style="margin-bottom:10px"/>
+        <label class="lbl">Database ID</label>
+        <input type="text" id="cfg-nd" class="inp" placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" style="margin-bottom:12px"/>
+        <div style="background:#0C1017;border-radius:8px;padding:10px 13px;margin-bottom:12px;font-size:12px;color:#8896AA;line-height:1.7">
+          💡 Chaque journal a son propre Database ID Notion. Créez 3 bases séparées.
+        </div>
+        <div style="display:flex;gap:8px">
+          <button id="btn-disc" onclick="notionDisc()" class="btn" style="background:#EF454A22;color:#EF454A;border:1px solid #EF454A44;display:none">Déconnecter</button>
+          <button onclick="notionSave()" id="save-btn" class="btn" style="flex:1">💾 Sauvegarder</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="sct" style="margin-bottom:12px">📊 Statistiques du Journal</div>
+        <div id="cfg-stats" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
       </div>
     </div>
-    <label class="lbl" style="margin-bottom:8px">Confluences</label>
-    <div id="conf-list"></div>
-    <div id="score-box" style="display:none;border-radius:8px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-      <span style="font-size:12px;color:#8896AA">Score</span>
-      <span id="score-val" style="font-size:14px;font-weight:700"></span>
-    </div>
-    <label class="lbl">Notes</label>
-    <textarea id="f-notes" class="inp" rows="3" placeholder="Leçons apprises..." style="resize:vertical;line-height:1.6"></textarea>
-  </div>
 
-  <div class="card" style="margin-bottom:12px">
-    <div style="font-size:12px;font-weight:700;color:#3772FF;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">📸 Captures</div>
-    <input type="file" id="fe" accept="image/*" onchange="pickImg('fe','e')"/>
-    <input type="file" id="fs" accept="image/*" onchange="pickImg('fs','s')"/>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div>
-        <label class="lbl" style="color:#00C087">Entrée</label>
-        <button onclick="document.getElementById('fe').click()" style="width:100%;background:#0C1017;border:1.5px dashed #00C08738;border-radius:10px;padding:16px;cursor:pointer;color:#8896AA;font-family:inherit;font-size:13px">
-          📷<br><span id="fe-name">Ajouter</span>
-        </button>
-        <img id="fe-img" style="display:none;width:100%;border-radius:8px;margin-top:8px;max-height:150px;object-fit:contain"/>
-      </div>
-      <div>
-        <label class="lbl" style="color:#EF454A">Sortie</label>
-        <button onclick="document.getElementById('fs').click()" style="width:100%;background:#0C1017;border:1.5px dashed #EF454A38;border-radius:10px;padding:16px;cursor:pointer;color:#8896AA;font-family:inherit;font-size:13px">
-          📷<br><span id="fs-name">Ajouter</span>
-        </button>
-        <img id="fs-img" style="display:none;width:100%;border-radius:8px;margin-top:8px;max-height:150px;object-fit:contain"/>
-      </div>
-    </div>
-  </div>
-
-  <div style="display:flex;gap:10px;padding-bottom:20px">
-    <button onclick="cancelForm()" class="btn" style="background:#252D3A;color:#8896AA;flex:1">Annuler</button>
-    <button onclick="submitForm()" id="submit-btn" class="btn" style="flex:2">💾 Enregistrer</button>
-  </div>
-</div>
-
-<!-- HISTORIQUE -->
-<div id="t-hist" class="page">
-  <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
-    <select id="flt-pair" class="inp" style="width:auto;padding:8px;font-size:13px;cursor:pointer" onchange="renderHist()">
-      <option value="">Toutes paires</option>
-      <option>EUR/USD</option><option>GBP/USD</option><option>USD/JPY</option>
-      <option>USD/CHF</option><option>AUD/USD</option><option>USD/CAD</option>
-      <option>NZD/USD</option><option>EUR/GBP</option><option>EUR/JPY</option>
-      <option>GBP/JPY</option><option>CHF/JPY</option><option>XAU/USD (GOLD)</option>
-    </select>
-    <select id="flt-dir" class="inp" style="width:auto;padding:8px;font-size:13px;cursor:pointer" onchange="renderHist()">
-      <option value="">Direction</option><option>BUY</option><option>SELL</option>
-    </select>
-  </div>
-  <div id="hist-list"></div>
-</div>
-
-<!-- PARAMÈTRES -->
-<div id="t-cfg" class="page">
-  <div class="card" style="margin-bottom:12px">
-    <div style="font-size:12px;font-weight:700;color:#3772FF;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">🔗 Notion</div>
-    <div id="notion-status" style="border-radius:8px;padding:10px 13px;margin-bottom:12px;font-size:13px;font-weight:600"></div>
-    <label class="lbl">Token d'intégration</label>
-    <input type="password" id="cfg-nt" class="inp" placeholder="secret_xxxxxxxxxxxx" style="margin-bottom:10px"/>
-    <label class="lbl">Database ID</label>
-    <input type="text" id="cfg-nd" class="inp" placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" style="margin-bottom:12px"/>
-    <div style="background:#0C1017;border-radius:8px;padding:10px 13px;margin-bottom:12px;font-size:12px;color:#8896AA;line-height:1.7">
-      💡 Chaque journal a son propre Database ID Notion.
-    </div>
-    <div style="display:flex;gap:8px">
-      <button id="btn-disc" onclick="notionDisc()" class="btn" style="background:#EF454A22;color:#EF454A;border:1px solid #EF454A44;display:none">Déconnecter</button>
-      <button onclick="notionSave()" id="save-btn" class="btn" style="flex:1">💾 Sauvegarder</button>
-    </div>
-  </div>
-  <div class="card">
-    <div style="font-size:12px;font-weight:700;color:#3772FF;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">📊 Stats</div>
-    <div id="cfg-stats" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
   </div>
 </div>
 ```
@@ -224,10 +255,10 @@ select option{background:#151921}
   </div>
 </div>
 
-<!-- PAGE DÉTAIL -->
+<!-- DÉTAIL -->
 
 <div id="p-detail" class="page">
-  <div style="background:#151921;border-bottom:1px solid #252D3A;padding:14px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50">
+  <div style="background:#151921;border-bottom:1px solid #252D3A;padding:13px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50">
     <button onclick="goHist()" style="background:transparent;border:1px solid #252D3A;border-radius:8px;padding:6px 12px;color:#8896AA;cursor:pointer;font-family:inherit;font-size:13px">‹ Retour</button>
     <span style="font-weight:700;font-size:16px">Détail du Trade</span>
   </div>
@@ -236,8 +267,8 @@ select option{background:#151921}
 
 <script>
 // ── Data ──
-var JDATA = {j1:{color:"#3772FF",emoji:"📘"},j2:{color:"#00C087",emoji:"📗"},j3:{color:"#F5A623",emoji:"📙"}};
-var CONF_DEF = [
+var JDATA={j1:{color:"#3772FF",emoji:"📘"},j2:{color:"#00C087",emoji:"📗"},j3:{color:"#F5A623",emoji:"📙"}};
+var CONF_DEF=[
   {key:"r_zone",ico:"🗺️",label:"Zone Clé",sub:"Ancienne Offre / Demande"},
   {key:"r_sweep",ico:"💧",label:"Sweep de Liquidité",sub:"Avant la cassure"},
   {key:"r_bos",ico:"⚡",label:"Cassure Momentum",sub:"BOS / CHoCH"},
@@ -246,256 +277,313 @@ var CONF_DEF = [
 ];
 
 // ── State ──
-var jid = null, jcol = "#3772FF", jname = "", jemoji = "📘";
-var trades = [], nt = "", nd = "", editId = null;
-var conf = {r_zone:false,r_sweep:false,r_bos:false,r_fvg:false,r_inducement:false};
-var imgEntry = null, imgExit = null, imgEntryName = "", imgExitName = "";
+var jid=null,jcol="#3772FF",jname="",jemoji="📘";
+var trades=[],nt="",nd="",editId=null;
+var conf={r_zone:false,r_sweep:false,r_bos:false,r_fvg:false,r_inducement:false};
+var imgEntry=null,imgExit=null,imgEntryName="",imgExitName="";
 
 function ls(k){try{return localStorage.getItem(k);}catch(e){return null;}}
 function lss(k,v){try{localStorage.setItem(k,v);}catch(e){}}
 
-function toast(msg, ok) {
-  var el = document.getElementById("toast");
-  el.textContent = (ok ? "✅ " : "❌ ") + msg;
-  el.style.display = "block";
-  el.style.background = ok ? "#0A2219" : "#250B0C";
-  el.style.border = "1px solid " + (ok ? "#00C087" : "#EF454A");
-  el.style.color = ok ? "#00C087" : "#EF454A";
-  setTimeout(function(){el.style.display="none";}, 2500);
+function toast(msg,ok){
+  var el=document.getElementById("toast");
+  el.textContent=(ok?"✅ ":"❌ ")+msg;
+  el.style.display="block";
+  el.style.background=ok?"#0A2219":"#250B0C";
+  el.style.border="1px solid "+(ok?"#00C087":"#EF454A");
+  el.style.color=ok?"#00C087":"#EF454A";
+  setTimeout(function(){el.style.display="none";},2500);
 }
 
-function showPage(id) {
+function showPage(id){
   ["p-home","p-journal","p-detail"].forEach(function(p){
     document.getElementById(p).classList.remove("show");
   });
   document.getElementById(id).classList.add("show");
 }
 
-function showTab(tab) {
+function showTab(tab){
   ["dash","add","hist","cfg"].forEach(function(t){
     document.getElementById("t-"+t).classList.remove("show");
-    var el = document.getElementById("tab-"+t);
-    if(el){el.style.color="#8896AA";}
+    var nb=document.getElementById("nb-"+t);
+    if(nb){nb.classList.remove("on");nb.style.color="#8896AA";nb.style.background="transparent";nb.style.borderColor="transparent";}
   });
   document.getElementById("t-"+tab).classList.add("show");
-  var tabEl = document.getElementById("tab-"+tab);
-  if(tabEl) tabEl.style.color = jcol;
-  if(tab==="dash") renderDash();
-  if(tab==="hist") renderHist();
-  if(tab==="cfg") renderCfg();
-  if(tab==="add") renderForm();
+  var nb=document.getElementById("nb-"+tab);
+  if(nb){nb.classList.add("on");nb.style.color=jcol;nb.style.background=jcol+"1C";nb.style.borderColor=jcol+"55";}
+  var titles={dash:"Dashboard",add:"Nouveau Trade",hist:"Historique",cfg:"Paramètres"};
+  document.getElementById("hdr-title").textContent="— "+titles[tab];
+  if(tab==="dash")renderDash();
+  if(tab==="hist")renderHist();
+  if(tab==="cfg")renderCfg();
+  if(tab==="add")renderForm();
 }
 
-// ── Home ──
-function renderHome() {
-  var names = {};
-  try { var v=ls("jnames"); if(v) names=JSON.parse(v); } catch(e){}
-  var html = "";
+// ── HOME ──
+function renderHome(){
+  var names={};
+  try{var v=ls("jnames");if(v)names=JSON.parse(v);}catch(e){}
+  var html="";
   ["j1","j2","j3"].forEach(function(id){
-    var n = names[id] || {j1:"Journal 1",j2:"Journal 2",j3:"Journal 3"}[id];
-    var col = JDATA[id].color, emo = JDATA[id].emoji;
-    var v = ls("t-"+id); var tr = v?JSON.parse(v):[];
-    var pnls = tr.map(function(t){return parseFloat(t.pnlPercent)||0;});
-    var tot = pnls.reduce(function(a,b){return a+b;},0);
-    var w = pnls.filter(function(p){return p>0;}).length;
-    var wr = tr.length ? Math.round((w/tr.length)*100)+"%" : "—";
-    var totStr = tr.length ? (tot>=0?"+":"")+tot.toFixed(1)+"%" : "—";
-    html += '<div onclick="openJournal(\''+id+'\',\''+n+'\',\''+col+'\',\''+emo+'\')" style="background:#151921;border:1.5px solid #252D3A;border-radius:14px;padding:20px;margin-bottom:14px;cursor:pointer">'
+    var n=names[id]||{j1:"Journal 1",j2:"Journal 2",j3:"Journal 3"}[id];
+    var col=JDATA[id].color,emo=JDATA[id].emoji;
+    var v=ls("t-"+id);var tr=v?JSON.parse(v):[];
+    var pnls=tr.map(function(t){return parseFloat(t.pnlPercent)||0;});
+    var tot=pnls.reduce(function(a,b){return a+b;},0);
+    var w=pnls.filter(function(p){return p>0;}).length;
+    var wr=tr.length?Math.round((w/tr.length)*100)+"%":"—";
+    var totStr=tr.length?(tot>=0?"+":"")+tot.toFixed(1)+"%":"—";
+    html+='<div onclick="openJournal(\''+id+'\',\''+n+'\',\''+col+'\',\''+emo+'\')" style="background:#151921;border:1.5px solid #252D3A;border-radius:14px;padding:20px;margin-bottom:14px;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor=\''+col+'66\'" onmouseout="this.style.borderColor=\'#252D3A\'">'
       +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">'
-      +'<div style="width:48px;height:48px;border-radius:12px;background:'+col+'15;border:1.5px solid '+col+'30;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">'+emo+'</div>'
-      +'<div><div style="font-size:17px;font-weight:800">'+n+'</div>'
-      +'<div style="font-size:12px;color:#8896AA">'+tr.length+' trade'+(tr.length!==1?"s":"")+(wr!=="—"?" · Win Rate "+wr:"")+'</div></div></div>'
+      +'<div style="width:50px;height:50px;border-radius:13px;background:'+col+'15;border:1.5px solid '+col+'30;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0">'+emo+'</div>'
+      +'<div><div style="font-size:18px;font-weight:800">'+n+'</div>'
+      +'<div style="font-size:12px;color:#8896AA;margin-top:2px">'+tr.length+' trade'+(tr.length!==1?"s":"")+(wr!=="—"?" · WR "+wr:"")+'</div></div></div>'
       +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px">'
-      +[["Trades",""+tr.length,col],["P&L",totStr,tot>=0?"#00C087":"#EF454A"],["Wins",""+w,"#00C087"],["Losses",""+( tr.length-w),"#EF454A"]].map(function(a){
-        return '<div style="background:#0B0E11;border-radius:8px;padding:8px 10px"><div style="font-size:10px;color:#3D4D63;text-transform:uppercase;margin-bottom:3px">'+a[0]+'</div><div style="font-size:17px;font-weight:700;color:'+a[2]+'">'+a[1]+'</div></div>';
+      +[["Trades",""+tr.length,col],["P&L",totStr,tot>=0?"#00C087":"#EF454A"],["Wins",""+w,"#00C087"],["Losses",""+(tr.length-w),"#EF454A"]].map(function(a){
+        return '<div style="background:#0B0E11;border-radius:8px;padding:8px 10px"><div style="font-size:10px;color:#3D4D63;text-transform:uppercase;margin-bottom:3px">'+a[0]+'</div><div style="font-size:18px;font-weight:700;color:'+a[2]+'">'+a[1]+'</div></div>';
       }).join("")+'</div>'
       +'<div style="background:linear-gradient(135deg,'+col+','+col+'99);border-radius:8px;padding:11px;text-align:center;color:#fff;font-weight:700;font-size:14px">Ouvrir '+n+' ›</div>'
       +'</div>';
   });
-  document.getElementById("journal-list").innerHTML = html;
+  document.getElementById("home-list").innerHTML=html;
 }
 
-function openJournal(id, n, col, emo) {
-  jid=id; jname=n; jcol=col; jemoji=emo;
-  var v=ls("t-"+id); trades=v?JSON.parse(v):[];
-  var nv=ls("n-"+id); nt=""; nd="";
+function openJournal(id,n,col,emo){
+  jid=id;jname=n;jcol=col;jemoji=emo;
+  var v=ls("t-"+id);trades=v?JSON.parse(v):[];
+  var nv=ls("n-"+id);nt="";nd="";
   if(nv){try{var c=JSON.parse(nv);nt=c.t||"";nd=c.d||"";}catch(e){}}
-  document.getElementById("j-name").textContent = n;
-  document.getElementById("j-emoji").textContent = emo;
+  document.getElementById("hdr-name").textContent=n;
+  document.getElementById("hdr-emo").textContent=emo;
+  document.getElementById("sb-emo").textContent=emo;
+  document.getElementById("sb-emo").style.background=col+"18";
+  document.getElementById("sb-emo").style.border="1.5px solid "+col+"35";
+  document.getElementById("notion-dot").style.background=nt&&nd?"#00C087":"#3D4D63";
+  document.getElementById("btn-new").style.background="linear-gradient(135deg,"+col+","+col+"BB)";
+  document.getElementById("sidebar").style.cssText+="--jcol:"+col;
   showPage("p-journal");
   showTab("dash");
 }
 
-function goHome() {
-  renderHome();
-  showPage("p-home");
+function goHome(){renderHome();showPage("p-home");}
+
+// ── SVG CHARTS ──
+function buildCurveChart(){
+  var sorted=[].concat(trades).sort(function(a,b){return new Date(a.entryDate)-new Date(b.entryDate);});
+  if(!sorted.length)return'<div style="color:#3D4D63;font-size:13px;text-align:center;padding:40px 0">Aucun trade pour le graphique</div>';
+  var W=340,H=110,pad=4;
+  var cum=0;var points=sorted.map(function(t){cum+=parseFloat(t.pnlPercent)||0;return cum;});
+  points.unshift(0);
+  var mn=Math.min.apply(null,points),mx=Math.max.apply(null,points);
+  var range=mx-mn||1;
+  var n=points.length;
+  var xs=points.map(function(_,i){return pad+(i/(n-1))*(W-pad*2);});
+  var ys=points.map(function(v){return H-pad-(v-mn)/range*(H-pad*2);});
+  var path="M"+xs[0]+","+ys[0];
+  for(var i=1;i<n;i++)path+=" L"+xs[i]+","+ys[i];
+  var fill=path+" L"+xs[n-1]+","+(H-pad)+" L"+xs[0]+","+(H-pad)+" Z";
+  var isPos=points[n-1]>=0;
+  var col=isPos?"#00C087":"#EF454A";
+  var zero=H-pad-(0-mn)/range*(H-pad*2);
+  var dots=xs.map(function(x,i){
+    if(i===0)return"";
+    var pc=points[i];var dc=pc>0?"#00C087":pc<0?"#EF454A":"#8896AA";
+    return'<circle cx="'+x+'" cy="'+ys[i]+'" r="3" fill="'+dc+'" />';
+  }).join("");
+  return'<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block">'
+    +'<defs><linearGradient id="lg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+col+'" stop-opacity=".28"/><stop offset="100%" stop-color="'+col+'" stop-opacity="0"/></linearGradient></defs>'
+    +'<line x1="'+pad+'" y1="'+zero+'" x2="'+(W-pad)+'" y2="'+zero+'" stroke="#252D3A" stroke-dasharray="4 4" stroke-width="1"/>'
+    +'<path d="'+fill+'" fill="url(#lg)"/>'
+    +'<path d="'+path+'" fill="none" stroke="'+col+'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>'
+    +dots
+    +'</svg>';
 }
 
-// ── Dashboard ──
-function renderDash() {
-  var pnls = trades.map(function(t){return parseFloat(t.pnlPercent)||0;});
-  var w = pnls.filter(function(p){return p>0;}).length;
-  var tot = pnls.reduce(function(a,b){return a+b;},0);
-  var n = trades.length;
-  var wr = n ? Math.round((w/n)*100)+"%" : "—";
-  var avg = n ? (tot/n).toFixed(2)+"%" : "—";
-  var totStr = n ? (tot>=0?"+":"")+tot.toFixed(2)+"%" : "—";
-  var best = n ? Math.max.apply(null,pnls).toFixed(2)+"%" : "—";
-  var worst = n ? Math.min.apply(null,pnls).toFixed(2)+"%" : "—";
+function buildBarChart(){
+  var sorted=[].concat(trades).sort(function(a,b){return new Date(a.entryDate)-new Date(b.entryDate);});
+  if(!sorted.length)return'<div style="color:#3D4D63;font-size:13px;text-align:center;padding:20px 0">Aucun trade</div>';
+  var W=340,H=80,pad=4;
+  var vals=sorted.map(function(t){return parseFloat(t.pnlPercent)||0;});
+  var mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals);
+  var absMax=Math.max(Math.abs(mn),Math.abs(mx),0.01);
+  var n=vals.length;
+  var bw=Math.max(4,(W-pad*2)/n-2);
+  var bars=vals.map(function(v,i){
+    var x=pad+i*(W-pad*2)/n;
+    var midY=H/2;
+    var h=Math.abs(v)/absMax*(H/2-pad);
+    var y=v>=0?midY-h:midY;
+    var col=v>0?"#00C087":v<0?"#EF454A":"#8896AA";
+    return'<rect x="'+x+'" y="'+y+'" width="'+(bw)+'" height="'+Math.max(2,h)+'" fill="'+col+'" rx="2" opacity=".85"/>';
+  }).join("");
+  return'<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block">'
+    +'<line x1="'+pad+'" y1="'+(H/2)+'" x2="'+(W-pad)+'" y2="'+(H/2)+'" stroke="#252D3A" stroke-width="1"/>'
+    +bars+'</svg>';
+}
 
-  var sc = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">'
-    +[["Total",""+n,jcol],["Win Rate",wr,"#00C087"],["P&L Total",totStr,tot>=0?"#00C087":"#EF454A"],["P&L Moyen",avg,"#A78BFA"],["Meilleur",best,"#00C087"],["Pire",worst,"#EF454A"]].map(function(a){
-      return '<div class="card"><div style="font-size:11px;font-weight:600;color:#8896AA;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">'+a[0]+'</div><div style="font-size:22px;font-weight:800;color:'+a[2]+'">'+a[1]+'</div></div>';
-    }).join("")+'</div>';
+// ── DASHBOARD ──
+function renderDash(){
+  var pnls=trades.map(function(t){return parseFloat(t.pnlPercent)||0;});
+  var wins=pnls.filter(function(p){return p>0;});
+  var losses=pnls.filter(function(p){return p<0;});
+  var n=trades.length;
+  var w=wins.length,l=losses.length;
+  var tot=pnls.reduce(function(a,b){return a+b;},0);
+  var wr=n?Math.round((w/n)*100)+"%":"—";
+  var avg=n?(tot/n).toFixed(2)+"%":"—";
+  var totStr=n?(tot>=0?"+":"")+tot.toFixed(2)+"%":"—";
+  var best=n?Math.max.apply(null,pnls).toFixed(2)+"%":"—";
+  var worst=n?Math.min.apply(null,pnls).toFixed(2)+"%":"—";
+  var avgW=w?(wins.reduce(function(a,b){return a+b;},0)/w).toFixed(2)+"%":"—";
+  var avgL=l?(losses.reduce(function(a,b){return a+b;},0)/l).toFixed(2)+"%":"—";
 
-  document.getElementById("dash-stats").outerHTML = sc;
+  document.getElementById("dash-stats").innerHTML=
+    [["Total",""+n,jcol],["Win Rate",wr,"#00C087"],
+     ["P&L Total",totStr,tot>=0?"#00C087":"#EF454A"],["P&L Moyen",avg,"#A78BFA"],
+     ["Meilleur",best,"#00C087"],["Pire",worst,"#EF454A"],
+     ["Moy. Gain",avgW,"#00C087"],["Moy. Perte",avgL,"#EF454A"]
+    ].map(function(a){
+      return'<div class="card" style="padding:13px 14px"><div style="font-size:10px;font-weight:600;color:#8896AA;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">'+a[0]+'</div><div style="font-size:20px;font-weight:800;color:'+a[2]+';font-family:monospace">'+a[1]+'</div></div>';
+    }).join("");
 
-  var rows = "";
-  if(!n) {
-    rows = '<div class="card" style="text-align:center;padding:40px 20px"><div style="font-size:40px;margin-bottom:12px">'+jemoji+'</div><div style="font-size:15px;color:#8896AA;margin-bottom:8px">Aucun trade</div><button onclick="showTab(\'add\')" class="btn" style="background:linear-gradient(135deg,'+jcol+','+jcol+'BB)">＋ Premier Trade</button></div>';
+  document.getElementById("chart-container").innerHTML=buildCurveChart();
+  document.getElementById("bar-container").innerHTML=buildBarChart();
+
+  var rows="";
+  if(!n){
+    rows='<div class="card" style="text-align:center;padding:36px 20px"><div style="font-size:40px;margin-bottom:12px">'+jemoji+'</div><div style="font-size:15px;color:#8896AA;margin-bottom:12px">Aucun trade enregistré</div><button onclick="showTab(\'add\')" class="btn" style="background:linear-gradient(135deg,'+jcol+','+jcol+'BB)">＋ Premier Trade</button></div>';
   } else {
-    rows = '<div style="font-size:11px;font-weight:700;color:#8896AA;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Derniers trades</div>'
-      + trades.slice(0,5).map(function(t){return tradeRow(t);}).join("");
-    if(n>5) rows += '<button onclick="showTab(\'hist\')" style="background:transparent;border:none;color:'+jcol+';cursor:pointer;font-size:13px;font-weight:600;font-family:inherit">Voir tous ('+n+') →</button>';
+    rows='<div style="font-size:11px;font-weight:700;color:#8896AA;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Derniers trades</div>'
+      +trades.slice(0,5).map(function(t){return tradeRow(t);}).join("");
+    if(n>5)rows+='<button onclick="showTab(\'hist\')" style="background:transparent;border:none;color:'+jcol+';cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;margin-top:4px">Voir tous ('+n+') →</button>';
   }
-  document.getElementById("dash-trades").innerHTML = rows;
+  document.getElementById("dash-trades").innerHTML=rows;
 }
 
-function tradeRow(t) {
+function tradeRow(t){
   var pnl=parseFloat(t.pnlPercent)||0;
   var pc=pnl>0?"#00C087":pnl<0?"#EF454A":"#8896AA";
   var dc=t.direction==="BUY"?"#00C087":"#EF454A";
-  return '<div class="row" onclick="viewTrade(\''+t.id+'\')">'
+  return'<div class="row" onclick="viewTrade(\''+t.id+'\')">'
     +'<div style="width:7px;height:7px;border-radius:50%;background:'+(pnl>0?"#00C087":pnl<0?"#EF454A":"#3D4D63")+';flex-shrink:0"></div>'
-    +'<div style="font-weight:700;font-size:14px;min-width:90px;font-family:monospace">'+t.pair+'</div>'
-    +'<span style="background:'+dc+'1A;color:'+dc+';border:1px solid '+dc+'40;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700">'+t.direction+'</span>'
+    +'<div style="font-weight:700;font-size:13px;min-width:90px;font-family:monospace">'+t.pair+'</div>'
+    +'<span style="background:'+dc+'1A;color:'+dc+';border:1px solid '+dc+'40;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700">'+t.direction+'</span>'
     +(t.strategy?'<div style="font-size:12px;color:#8896AA;flex:1">'+t.strategy+'</div>':'<div style="flex:1"></div>')
+    +(t.entryDate?'<div style="font-size:11px;color:#3D4D63;font-family:monospace">'+new Date(t.entryDate).toLocaleDateString("fr",{day:"2-digit",month:"2-digit"})+'</div>':"")
     +(t.pnlPercent?'<div style="font-size:13px;font-weight:700;color:'+pc+';font-family:monospace">'+(pnl>=0?"+":"")+t.pnlPercent+'%</div>':"")
-    +'<span style="color:#3D4D63">›</span></div>';
+    +'<span style="color:#3D4D63;font-size:13px">›</span></div>';
 }
 
-// ── Historique ──
-function renderHist() {
-  var fp = document.getElementById("flt-pair").value;
-  var fd = document.getElementById("flt-dir").value;
-  var fil = trades.filter(function(t){
+// ── HISTORIQUE ──
+function renderHist(){
+  var fp=document.getElementById("flt-pair").value;
+  var fd=document.getElementById("flt-dir").value;
+  var fs=document.getElementById("flt-str").value;
+  var fse=document.getElementById("flt-ses").value;
+  var fil=trades.filter(function(t){
     if(fp&&t.pair!==fp)return false;
     if(fd&&t.direction!==fd)return false;
+    if(fs&&t.strategy!==fs)return false;
+    if(fse&&t.session!==fse)return false;
     return true;
   });
-  var html = fil.length ? fil.map(function(t){return tradeRow(t);}).join("") :
+  document.getElementById("hist-count").textContent=fil.length+" trade"+(fil.length!==1?"s":"")+" trouvé"+(fil.length!==1?"s":"");
+  document.getElementById("hist-list").innerHTML=fil.length?fil.map(function(t){return tradeRow(t);}).join(""):
     '<div class="card" style="text-align:center;padding:32px;color:#3D4D63">Aucun trade trouvé</div>';
-  document.getElementById("hist-list").innerHTML = html;
 }
 
-// ── Formulaire ──
-function renderForm() {
+// ── FORMULAIRE ──
+function renderForm(){
+  // Section titles
+  var scts=document.querySelectorAll(".sct");
+  scts.forEach(function(el){
+    el.style.fontSize="12px";el.style.fontWeight="700";
+    el.style.color=jcol;el.style.textTransform="uppercase";el.style.letterSpacing=".08em";
+  });
+  // Session box color
+  var sb=document.getElementById("session-box");
+  if(sb){sb.style.background=jcol+"0D";sb.style.border="1px solid "+jcol+"28";}
+  var sv=document.getElementById("session-val");
+  if(sv)sv.style.color=jcol;
+
   // Confluences
-  var cl = "";
+  var cl="";
   CONF_DEF.forEach(function(c){
-    var on = conf[c.key];
-    cl += '<div onclick="togConf(\''+c.key+'\')" style="display:flex;align-items:center;gap:11px;border:1px solid '+(on?jcol+"48":"#252D3A")+';border-radius:10px;padding:11px 13px;cursor:pointer;margin-bottom:7px;background:'+(on?jcol+"0D":"#0C1017")+'">'
-      +'<div class="check" style="background:'+(on?jcol:"transparent")+';border:'+(on?"none":"1.5px solid #3D4D63")+'">'+(on?"✓":"")+'</div>'
+    var on=conf[c.key];
+    cl+='<div onclick="togConf(\''+c.key+'\')" style="display:flex;align-items:center;gap:11px;border:1px solid '+(on?jcol+"48":"#252D3A")+';border-radius:10px;padding:11px 13px;cursor:pointer;margin-bottom:7px;background:'+(on?jcol+"0D":"#0C1017")+';user-select:none">'
+      +'<div style="width:22px;height:22px;border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;background:'+(on?jcol:"transparent")+';border:'+(on?"none":"1.5px solid #3D4D63")+'">'+(on?"✓":"")+'</div>'
       +'<span style="font-size:17px">'+c.ico+'</span>'
       +'<div style="flex:1"><div style="font-size:13px;font-weight:600;color:'+(on?"#E8EDF5":"#8896AA")+'">'+c.label+'</div><div style="font-size:11px;color:#3D4D63">'+c.sub+'</div></div>'
-      +'<span style="font-size:10px;font-weight:700;color:'+(on?jcol:"#3D4D63")+'">'+( on?"OUI":"NON")+'</span>'
+      +'<span style="font-size:10px;font-weight:700;color:'+(on?jcol:"#3D4D63")+'">'+(on?"OUI":"NON")+'</span>'
       +'</div>';
   });
-  document.getElementById("conf-list").innerHTML = cl;
+  document.getElementById("conf-list").innerHTML=cl;
 
   // Score
-  var sc = CONF_DEF.filter(function(c){return conf[c.key];}).length;
-  var sbox = document.getElementById("score-box");
-  if(sc>0) {
-    var scc = sc>=4?"#00C087":sc>=2?"#F5A623":"#EF454A";
-    sbox.style.display="flex";
-    sbox.style.background=scc+"0E";
-    sbox.style.border="1px solid "+scc+"28";
+  var sc=CONF_DEF.filter(function(c){return conf[c.key];}).length;
+  var sbox=document.getElementById("score-box");
+  if(sc>0){
+    var scc=sc>=4?"#00C087":sc>=2?"#F5A623":"#EF454A";
+    sbox.style.display="flex";sbox.style.background=scc+"0E";sbox.style.border="1px solid "+scc+"28";
     document.getElementById("score-val").textContent=sc+"/5 "+(sc>=4?"🔥":sc>=2?"👍":"⚠️");
     document.getElementById("score-val").style.color=scc;
-  } else {
-    sbox.style.display="none";
-  }
+  } else {sbox.style.display="none";}
 
-  // Btn color
   document.getElementById("submit-btn").style.background="linear-gradient(135deg,"+jcol+","+jcol+"BB)";
   document.getElementById("form-title").textContent=editId?"Modifier le Trade":"Nouveau Trade";
   document.getElementById("submit-btn").textContent=editId?"💾 Mettre à Jour":"💾 Enregistrer";
 }
 
-function togConf(key) {
-  conf[key]=!conf[key];
-  renderForm();
-}
+function togConf(key){conf[key]=!conf[key];renderForm();}
 
-function setDir(d) {
-  var buy=document.getElementById("btn-buy");
-  var sell=document.getElementById("btn-sell");
+function setDir(d){
+  var buy=document.getElementById("btn-buy"),sell=document.getElementById("btn-sell");
   if(d==="BUY"){
     buy.style.background="#00C0871E";buy.style.borderColor="#00C087";buy.style.color="#00C087";
     sell.style.background="#0C1017";sell.style.borderColor="#252D3A";sell.style.color="#8896AA";
-  } else {
+  }else{
     sell.style.background="#EF454A1E";sell.style.borderColor="#EF454A";sell.style.color="#EF454A";
     buy.style.background="#0C1017";buy.style.borderColor="#252D3A";buy.style.color="#8896AA";
   }
 }
+function getDir(){var b=document.getElementById("btn-buy");return b&&b.style.color==="rgb(0, 192, 135)"?"BUY":"SELL";}
 
-function getDir(){
-  var buy=document.getElementById("btn-buy");
-  return buy&&buy.style.color==="#00C087"?"BUY":"SELL";
-}
-
-function getSession(dt){
+function getSess(dt){
   if(!dt)return"";
   var h=new Date(dt).getUTCHours();
   if(h>=7&&h<9)return"🔀 Overlap Tokyo/Londres";
   if(h>=12&&h<16)return"🔀 Overlap Londres/NY";
-  if(h<9)return"🇯🇵 Tokyo";
-  if(h<12)return"🇬🇧 Londres";
-  if(h<21)return"🇺🇸 New York";
-  return"🌙 Creux";
+  if(h<9)return"🇯🇵 Tokyo";if(h<12)return"🇬🇧 Londres";
+  if(h<21)return"🇺🇸 New York";return"🌙 Creux";
 }
-
 function getDur(e,s){
-  if(!e||!s)return"";
-  var d=new Date(s)-new Date(e);
-  if(d<=0)return"";
+  if(!e||!s)return"";var d=new Date(s)-new Date(e);if(d<=0)return"";
   var m=Math.floor(d/60000),dy=Math.floor(m/1440),h=Math.floor((m%1440)/60),mn=m%60;
-  if(dy>0)return dy+"j "+h+"h "+mn+"min";
-  if(h>0)return h+"h "+mn+"min";
-  return mn+" min";
+  if(dy>0)return dy+"j "+h+"h "+mn+"min";if(h>0)return h+"h "+mn+"min";return mn+" min";
 }
 
 function onEntryDate(){
   var v=document.getElementById("f-entry").value;
-  var s=getSession(v);
-  var sb=document.getElementById("session-box");
+  var s=getSess(v);var sb=document.getElementById("session-box");
   if(s){sb.style.display="block";document.getElementById("session-val").textContent=s;}
   else{sb.style.display="none";}
   onExitDate();
 }
-
 function onExitDate(){
-  var e=document.getElementById("f-entry").value;
-  var s=document.getElementById("f-exit").value;
-  var d=getDur(e,s);
-  var db=document.getElementById("dur-box");
+  var e=document.getElementById("f-entry").value,s=document.getElementById("f-exit").value;
+  var d=getDur(e,s);var db=document.getElementById("dur-box");
   if(d){db.style.display="block";document.getElementById("dur-val").textContent=d;}
   else{db.style.display="none";}
 }
 
-function pickImg(inputId,side){
-  var el=document.getElementById(inputId);
-  if(!el||!el.files||!el.files[0])return;
-  var reader=new FileReader();
-  var file=el.files[0];
+function pickImg(id,side){
+  var el=document.getElementById(id);if(!el||!el.files||!el.files[0])return;
+  var reader=new FileReader(),file=el.files[0];
   reader.onload=function(ev){
-    if(side==="e"){
-      imgEntry=ev.target.result;imgEntryName=file.name;
+    if(side==="e"){imgEntry=ev.target.result;imgEntryName=file.name;
       document.getElementById("fe-name").textContent=file.name;
       var img=document.getElementById("fe-img");img.src=ev.target.result;img.style.display="block";
-    } else {
-      imgExit=ev.target.result;imgExitName=file.name;
+    }else{imgExit=ev.target.result;imgExitName=file.name;
       document.getElementById("fs-name").textContent=file.name;
       var img=document.getElementById("fs-img");img.src=ev.target.result;img.style.display="block";
     }
@@ -505,14 +593,10 @@ function pickImg(inputId,side){
 
 function clearForm(){
   document.getElementById("f-pair").value="EUR/USD";
-  document.getElementById("f-entry").value="";
-  document.getElementById("f-exit").value="";
-  document.getElementById("f-risk").value="";
-  document.getElementById("f-pnl").value="";
-  document.getElementById("f-amt").value="";
-  document.getElementById("f-strat").value="";
-  document.getElementById("f-emo").value="";
-  document.getElementById("f-notes").value="";
+  document.getElementById("f-entry").value="";document.getElementById("f-exit").value="";
+  document.getElementById("f-risk").value="";document.getElementById("f-pnl").value="";
+  document.getElementById("f-amt").value="";document.getElementById("f-strat").value="";
+  document.getElementById("f-emo").value="";document.getElementById("f-notes").value="";
   document.getElementById("session-box").style.display="none";
   document.getElementById("dur-box").style.display="none";
   document.getElementById("fe-name").textContent="Ajouter";
@@ -522,30 +606,21 @@ function clearForm(){
   conf={r_zone:false,r_sweep:false,r_bos:false,r_fvg:false,r_inducement:false};
   imgEntry=null;imgExit=null;imgEntryName="";imgExitName="";
   setDir("BUY");editId=null;
-  renderForm();
 }
-
 function cancelForm(){clearForm();showTab("hist");}
 
 function submitForm(){
-  var pair=document.getElementById("f-pair").value;
-  var entry=document.getElementById("f-entry").value;
+  var pair=document.getElementById("f-pair").value,entry=document.getElementById("f-entry").value;
   if(!pair||!entry){toast("Paire et date obligatoires",false);return;}
-  var t={
-    id:editId||""+Date.now(),
-    pair:pair,direction:getDir(),
+  var t={id:editId||""+Date.now(),pair:pair,direction:getDir(),
     entryDate:entry,exitDate:document.getElementById("f-exit").value,
-    session:getSession(entry),
-    riskPercent:document.getElementById("f-risk").value,
-    pnlPercent:document.getElementById("f-pnl").value,
-    pnlAmount:document.getElementById("f-amt").value,
-    strategy:document.getElementById("f-strat").value,
-    emotion:document.getElementById("f-emo").value,
+    session:getSess(entry),riskPercent:document.getElementById("f-risk").value,
+    pnlPercent:document.getElementById("f-pnl").value,pnlAmount:document.getElementById("f-amt").value,
+    strategy:document.getElementById("f-strat").value,emotion:document.getElementById("f-emo").value,
     notes:document.getElementById("f-notes").value,
     r_zone:conf.r_zone,r_sweep:conf.r_sweep,r_bos:conf.r_bos,r_fvg:conf.r_fvg,r_inducement:conf.r_inducement,
     screenshotEntry:imgEntry,screenshotEntryName:imgEntryName,
-    screenshotExit:imgExit,screenshotExitName:imgExitName
-  };
+    screenshotExit:imgExit,screenshotExitName:imgExitName};
   if(editId){trades=trades.map(function(x){return x.id===editId?t:x;});}
   else{trades.unshift(t);}
   lss("t-"+jid,JSON.stringify(trades));
@@ -554,47 +629,50 @@ function submitForm(){
   if(nt&&nd)syncNotion(t);
 }
 
-// ── Détail ──
+// ── DÉTAIL ──
 function viewTrade(id){
-  var t=null;
-  trades.forEach(function(x){if(x.id===id)t=x;});
-  if(!t)return;
+  var t=null;trades.forEach(function(x){if(x.id===id)t=x;});if(!t)return;
   var pnl=parseFloat(t.pnlPercent)||0;
   var sc=CONF_DEF.filter(function(c){return t[c.key];}).length;
   var scc=sc>=4?"#00C087":sc>=2?"#F5A623":"#EF454A";
   var dur=getDur(t.entryDate,t.exitDate);
-  var fd=function(d){return d?new Date(d).toLocaleString("fr"):"—";};
+  var fdf=function(d){return d?new Date(d).toLocaleString("fr"):"—";};
+  var dc=t.direction==="BUY"?"#00C087":"#EF454A";
+  var pc=pnl>=0?"#00C087":"#EF454A";
 
-  var html='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px">'
-    +'<span style="font-weight:800;font-size:18px;flex:1">'+t.pair+'</span>'
-    +'<span style="background:'+(t.direction==="BUY"?"#00C087":"#EF454A")+'1A;color:'+(t.direction==="BUY"?"#00C087":"#EF454A")+';border:1px solid '+(t.direction==="BUY"?"#00C087":"#EF454A")+'40;border-radius:6px;padding:2px 10px;font-size:12px;font-weight:700">'+t.direction+'</span>'
-    +(t.pnlPercent?'<span style="background:'+(pnl>=0?"#00C087":"#EF454A")+'1A;color:'+(pnl>=0?"#00C087":"#EF454A")+';border:1px solid '+(pnl>=0?"#00C087":"#EF454A")+'40;border-radius:6px;padding:2px 10px;font-size:12px;font-weight:700">'+(pnl>=0?"+":"")+t.pnlPercent+'%</span>':"")
+  var html='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px">'
+    +'<span style="font-weight:800;font-size:19px;flex:1">'+t.pair+'</span>'
+    +'<span style="background:'+dc+'1A;color:'+dc+';border:1px solid '+dc+'40;border-radius:6px;padding:2px 10px;font-size:12px;font-weight:700">'+t.direction+'</span>'
+    +(t.pnlPercent?'<span style="background:'+pc+'1A;color:'+pc+';border:1px solid '+pc+'40;border-radius:6px;padding:2px 10px;font-size:12px;font-weight:700">'+(pnl>=0?"+":"")+t.pnlPercent+'%</span>':"")
     +'</div>'
     +'<div style="display:flex;gap:8px;margin-bottom:16px">'
     +'<button onclick="editTrade(\''+t.id+'\')" style="flex:1;background:'+jcol+'1A;border:1px solid '+jcol+'44;border-radius:8px;padding:9px;cursor:pointer;color:'+jcol+';font-family:inherit;font-weight:600">✏️ Modifier</button>'
     +'<button onclick="deleteTrade(\''+t.id+'\')" style="flex:1;background:#EF454A1A;border:1px solid #EF454A44;border-radius:8px;padding:9px;cursor:pointer;color:#EF454A;font-family:inherit;font-weight:600">🗑️ Supprimer</button>'
     +'</div>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">'
-    +[["Paire",t.pair],["Session",t.session||"—"],["Date Entrée",fd(t.entryDate)],["Date Sortie",fd(t.exitDate)],["Durée",dur||"—"],["Risque",t.riskPercent?t.riskPercent+"%":"—"],["P&L %",t.pnlPercent?(pnl>=0?"+":"")+t.pnlPercent+"%":"—"],["P&L $",t.pnlAmount?t.pnlAmount+" $":"—"]].map(function(a){
-      return '<div class="card" style="padding:11px 14px"><div style="font-size:10px;color:#3D4D63;text-transform:uppercase;margin-bottom:4px">'+a[0]+'</div><div style="font-size:14px;font-weight:600;font-family:monospace">'+a[1]+'</div></div>';
+    +[["Paire",t.pair],["Session",t.session||"—"],["Date Entrée",fdf(t.entryDate)],["Date Sortie",fdf(t.exitDate)],
+      ["Durée",dur||"—"],["Risque",t.riskPercent?t.riskPercent+"%":"—"],
+      ["P&L %",t.pnlPercent?(pnl>=0?"+":"")+t.pnlPercent+"%":"—"],["P&L $",t.pnlAmount?t.pnlAmount+" $":"—"]
+    ].map(function(a){
+      return'<div class="card" style="padding:11px 14px"><div style="font-size:10px;color:#3D4D63;text-transform:uppercase;margin-bottom:4px">'+a[0]+'</div><div style="font-size:13px;font-weight:600;font-family:monospace">'+a[1]+'</div></div>';
     }).join("")+'</div>'
     +(t.emotion?'<div class="card" style="padding:11px 14px;display:flex;align-items:center;gap:10px;margin-bottom:12px"><span style="font-size:20px">'+t.emotion.split(" ")[0]+'</span><div><div style="font-size:10px;color:#3D4D63;text-transform:uppercase;margin-bottom:2px">Émotion</div><div style="font-size:13px;font-weight:600">'+t.emotion+'</div></div></div>':"")
     +'<div class="card" style="margin-bottom:12px">'
-    +'<div style="font-size:12px;font-weight:700;color:'+jcol+';text-transform:uppercase;margin-bottom:10px">✅ Confluences <span style="color:'+scc+'">'+sc+'/5</span></div>'
-    +CONF_DEF.map(function(c){var on=!!t[c.key];return'<div style="display:flex;align-items:center;gap:10px;margin-bottom:7px;opacity:'+(on?1:.3)+'">'
+    +'<div style="font-size:12px;font-weight:700;color:'+jcol+';text-transform:uppercase;margin-bottom:10px">✅ Confluences — <span style="color:'+scc+'">'+sc+'/5 '+(sc>=4?"🔥":sc>=2?"👍":"⚠️")+'</span></div>'
+    +CONF_DEF.map(function(c){var on=!!t[c.key];return'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;opacity:'+(on?1:.3)+'">'
       +'<div style="width:18px;height:18px;border-radius:4px;background:'+(on?jcol:"transparent")+';border:'+(on?"none":"1.5px solid #3D4D63")+';display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700">'+(on?"✓":"")+'</div>'
-      +'<span>'+c.ico+'</span><span style="font-size:13px;font-weight:600;color:'+(on?"#E8EDF5":"#8896AA")+'">'+c.label+'</span></div>';}).join("")
+      +'<span>'+c.ico+'</span><span style="font-size:13px;font-weight:600;color:'+(on?"#E8EDF5":"#8896AA")+'">'+c.label+'</span><span style="font-size:11px;color:#3D4D63;margin-left:4px">'+c.sub+'</span></div>';}).join("")
     +'</div>'
     +(t.notes?'<div class="card" style="margin-bottom:12px"><div style="font-size:11px;color:#3D4D63;text-transform:uppercase;margin-bottom:6px">📝 Notes</div><div style="font-size:14px;line-height:1.7">'+t.notes+'</div></div>':"");
 
   if(t.screenshotEntry||t.screenshotExit){
     html+='<div class="card" style="margin-bottom:12px"><div style="font-size:12px;font-weight:700;color:'+jcol+';text-transform:uppercase;margin-bottom:10px">📸 Captures</div>'
       +'<div style="display:grid;grid-template-columns:'+(t.screenshotEntry&&t.screenshotExit?"1fr 1fr":"1fr")+';gap:10px">'
-      +(t.screenshotEntry?'<div><div style="font-size:10px;color:#00C087;font-weight:700;text-transform:uppercase;margin-bottom:6px">📈 Entrée</div><img src="'+t.screenshotEntry+'" style="width:100%;border-radius:8px;max-height:300px;object-fit:contain"/></div>':"")
-      +(t.screenshotExit?'<div><div style="font-size:10px;color:#EF454A;font-weight:700;text-transform:uppercase;margin-bottom:6px">📉 Sortie</div><img src="'+t.screenshotExit+'" style="width:100%;border-radius:8px;max-height:300px;object-fit:contain"/></div>':"")
+      +(t.screenshotEntry?'<div><div style="font-size:10px;color:#00C087;font-weight:700;text-transform:uppercase;margin-bottom:6px">📈 Entrée</div><img src="'+t.screenshotEntry+'" style="width:100%;border-radius:8px;max-height:280px;object-fit:contain"/></div>':"")
+      +(t.screenshotExit?'<div><div style="font-size:10px;color:#EF454A;font-weight:700;text-transform:uppercase;margin-bottom:6px">📉 Sortie</div><img src="'+t.screenshotExit+'" style="width:100%;border-radius:8px;max-height:280px;object-fit:contain"/></div>':"")
       +'</div></div>';
   }
-
+  html+='<div style="height:20px"></div>';
   document.getElementById("detail-content").innerHTML=html;
   showPage("p-detail");
 }
@@ -614,74 +692,62 @@ function editTrade(id){
     document.getElementById("f-strat").value=t.strategy||"";
     document.getElementById("f-emo").value=t.emotion||"";
     document.getElementById("f-notes").value=t.notes||"";
-    setDir(t.direction==="SELL"?"SELL":"BUY");
     conf={r_zone:!!t.r_zone,r_sweep:!!t.r_sweep,r_bos:!!t.r_bos,r_fvg:!!t.r_fvg,r_inducement:!!t.r_inducement};
     imgEntry=t.screenshotEntry||null;imgEntryName=t.screenshotEntryName||"";
     imgExit=t.screenshotExit||null;imgExitName=t.screenshotExitName||"";
-    if(imgEntry){document.getElementById("fe-img").src=imgEntry;document.getElementById("fe-img").style.display="block";document.getElementById("fe-name").textContent=imgEntryName;}
-    if(imgExit){document.getElementById("fs-img").src=imgExit;document.getElementById("fs-img").style.display="block";document.getElementById("fs-name").textContent=imgExitName;}
+    if(imgEntry){var i=document.getElementById("fe-img");i.src=imgEntry;i.style.display="block";document.getElementById("fe-name").textContent=imgEntryName;}
+    if(imgExit){var i=document.getElementById("fs-img");i.src=imgExit;i.style.display="block";document.getElementById("fs-name").textContent=imgExitName;}
+    setDir(t.direction||"BUY");
     if(t.entryDate)onEntryDate();
     editId=id;renderForm();
-  },50);
+  },60);
 }
 
 function deleteTrade(id){
   trades=trades.filter(function(t){return t.id!==id;});
   lss("t-"+jid,JSON.stringify(trades));
-  toast("Trade supprimé",true);
-  goHist();
+  toast("Trade supprimé",true);goHist();
 }
 
-// ── Config ──
+// ── CONFIG ──
 function renderCfg(){
   document.getElementById("cfg-nt").value=nt;
   document.getElementById("cfg-nd").value=nd;
-  var sb=document.getElementById("save-btn");
-  sb.style.background="linear-gradient(135deg,"+jcol+","+jcol+"BB)";
-  var disc=document.getElementById("btn-disc");
-  disc.style.display=nt&&nd?"inline-block":"none";
+  document.getElementById("save-btn").style.background="linear-gradient(135deg,"+jcol+","+jcol+"BB)";
+  document.getElementById("btn-disc").style.display=nt&&nd?"inline-block":"none";
   var ns=document.getElementById("notion-status");
-  if(nt&&nd){
-    ns.style.background="#00C0870F";ns.style.border="1px solid #00C08728";ns.style.color="#00C087";
-    ns.textContent="✅ Notion connecté — sync auto activée";
-  } else {
-    ns.style.background="#3772FF0D";ns.style.border="1px solid #3772FF28";ns.style.color="#3772FF";
-    ns.textContent="🔗 Entrez vos identifiants Notion";
-  }
+  if(nt&&nd){ns.style.background="#00C0870F";ns.style.border="1px solid #00C08728";ns.style.color="#00C087";ns.textContent="✅ Notion connecté — sync auto activée";}
+  else{ns.style.background="#3772FF0D";ns.style.border="1px solid #3772FF28";ns.style.color="#3772FF";ns.textContent="🔗 Entrez vos identifiants Notion";}
+  document.getElementById("notion-dot").style.background=nt&&nd?"#00C087":"#3D4D63";
+
   var pnls=trades.map(function(t){return parseFloat(t.pnlPercent)||0;});
+  var wins=pnls.filter(function(p){return p>0;});
+  var losses=pnls.filter(function(p){return p<0;});
+  var n=trades.length,w=wins.length,l=losses.length;
   var tot=pnls.reduce(function(a,b){return a+b;},0);
-  var w=pnls.filter(function(p){return p>0;}).length;
-  var n=trades.length;
+  var avgW=w?(wins.reduce(function(a,b){return a+b;},0)/w).toFixed(2)+"%":"—";
+  var avgL=l?(losses.reduce(function(a,b){return a+b;},0)/l).toFixed(2)+"%":"—";
   document.getElementById("cfg-stats").innerHTML=[
     ["Journal",jname],["Trades",""+n],
     ["Win Rate",n?Math.round((w/n)*100)+"%":"—"],
-    ["P&L Total",n?(tot>=0?"+":"")+tot.toFixed(2)+"%":"—"]
+    ["P&L Total",n?(tot>=0?"+":"")+tot.toFixed(2)+"%":"—"],
+    ["Trades Gagnants",""+w],["Trades Perdants",""+l],
+    ["Moy. Gain",avgW],["Moy. Perte",avgL]
   ].map(function(a){
-    return '<div style="background:#0C1017;border-radius:8px;padding:10px 12px"><div style="font-size:10px;color:#3D4D63;text-transform:uppercase;margin-bottom:3px">'+a[0]+'</div><div style="font-size:14px;font-weight:700;font-family:monospace">'+a[1]+'</div></div>';
+    return'<div style="background:#0C1017;border-radius:8px;padding:10px 12px"><div style="font-size:10px;color:#3D4D63;text-transform:uppercase;margin-bottom:3px">'+a[0]+'</div><div style="font-size:14px;font-weight:700;font-family:monospace">'+a[1]+'</div></div>';
   }).join("");
 }
 
 function notionSave(){
-  nt=document.getElementById("cfg-nt").value;
-  nd=document.getElementById("cfg-nd").value;
-  lss("n-"+jid,JSON.stringify({t:nt,d:nd}));
-  toast("Sauvegardé ✓",true);renderCfg();
+  nt=document.getElementById("cfg-nt").value;nd=document.getElementById("cfg-nd").value;
+  lss("n-"+jid,JSON.stringify({t:nt,d:nd}));toast("Sauvegardé ✓",true);renderCfg();
 }
-
-function notionDisc(){
-  nt="";nd="";lss("n-"+jid,JSON.stringify({t:"",d:""}));
-  toast("Notion déconnecté",true);renderCfg();
-}
+function notionDisc(){nt="";nd="";lss("n-"+jid,JSON.stringify({t:"",d:""}));toast("Notion déconnecté",true);renderCfg();}
 
 async function syncNotion(trade){
   try{
     var sc=CONF_DEF.filter(function(c){return trade[c.key];}).length;
-    var pr={
-      "Paire":{title:[{text:{content:trade.pair||""}}]},
-      "Direction":{select:{name:trade.direction||"BUY"}},
-      "Session":{rich_text:[{text:{content:trade.session||""}}]},
-      "Score":{number:sc}
-    };
+    var pr={"Paire":{title:[{text:{content:trade.pair||""}}]},"Direction":{select:{name:trade.direction||"BUY"}},"Session":{rich_text:[{text:{content:trade.session||""}}]},"Score":{number:sc}};
     if(trade.pnlPercent)pr["P&L (%)"]={number:parseFloat(trade.pnlPercent)};
     if(trade.strategy)pr["Stratégie"]={select:{name:trade.strategy}};
     if(trade.entryDate)pr["Date Entrée"]={date:{start:new Date(trade.entryDate).toISOString()}};
@@ -690,7 +756,7 @@ async function syncNotion(trade){
   }catch(e){toast("Notion: erreur",false);}
 }
 
-// ── Init ──
+// ── INIT ──
 renderHome();
 </script>
 
