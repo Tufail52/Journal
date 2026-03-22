@@ -65,23 +65,23 @@ select option{background:#151921}
       <div id="sb-emo" style="width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:8px;flex-shrink:0"></div>
       <div style="width:30px;height:1px;background:#252D3A;margin-bottom:4px"></div>
       <button class="nb on" id="nb-dash" onclick="showTab('dash')" title="Dashboard"><span>📊</span><span class="nl">Board</span></button>
-      <button class="nb" id="nb-add" onclick="showTab('add')" title="Nouveau"><span>➕</span><span class="nl">Trade</span></button>
-      <button class="nb" id="nb-hist" onclick="showTab('hist')" title="Historique"><span>📋</span><span class="nl">Histor.</span></button>
-      <button class="nb" id="nb-cfg" onclick="showTab('cfg')" title="Paramètres"><span>⚙️</span><span class="nl">Config</span></button>
-      <div style="flex:1"></div>
-      <div id="notion-dot" title="Notion" style="width:10px;height:10px;border-radius:50%;background:#3D4D63;margin-bottom:4px"></div>
-    </nav>
-    <!-- Content -->
-    <div class="ct">
-      <div class="hdr">
-        <span id="hdr-emo" style="font-size:20px">📘</span>
-        <span id="hdr-name" style="font-weight:700;font-size:16px"></span>
-        <span id="hdr-title" style="color:#8896AA;margin-left:4px"></span>
-        <button onclick="showTab('add')" id="btn-new" class="btn" style="margin-left:auto;font-size:13px;padding:9px 16px">＋ Nouveau</button>
-      </div>
-      <div class="sc-area">
 
 ```
+  <button class="nb" id="nb-hist" onclick="showTab('hist')" title="Historique"><span>📋</span><span class="nl">Histor.</span></button>
+  <button class="nb" id="nb-cfg" onclick="showTab('cfg')" title="Paramètres"><span>⚙️</span><span class="nl">Config</span></button>
+  <div style="flex:1"></div>
+  <div id="notion-dot" title="Notion" style="width:10px;height:10px;border-radius:50%;background:#3D4D63;margin-bottom:4px"></div>
+</nav>
+<!-- Content -->
+<div class="ct">
+  <div class="hdr">
+    <span id="hdr-emo" style="font-size:20px">📘</span>
+    <span id="hdr-name" style="font-weight:700;font-size:16px"></span>
+    <span id="hdr-title" style="color:#8896AA;margin-left:4px"></span>
+    <button onclick="showTab('add')" id="btn-new" class="btn" style="margin-left:auto;font-size:13px;padding:9px 16px">＋ Nouveau</button>
+  </div>
+  <div class="sc-area">
+
     <!-- DASHBOARD -->
     <div id="t-dash" class="page show">
       <div id="dash-stats" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px"></div>
@@ -213,12 +213,9 @@ select option{background:#151921}
         </select>
         <select id="flt-ses" class="inp" style="width:auto;padding:8px 10px;font-size:13px;cursor:pointer;flex:1;min-width:120px" onchange="renderHist()">
           <option value="">Session</option>
-          <option>🇯🇵 Tokyo</option>
-          <option>🇬🇧 Londres</option>
-          <option>🇺🇸 New York</option>
-          <option>🔀 Overlap Tokyo/Londres</option>
-          <option>🔀 Overlap Londres/NY</option>
-          <option>🌙 Creux</option>
+          <option>Asie</option>
+          <option>Londres</option>
+          <option>New York</option>
         </select>
       </div>
       <div id="hist-count" style="font-size:12px;color:#8896AA;margin-bottom:10px"></div>
@@ -240,6 +237,19 @@ select option{background:#151921}
         <div style="display:flex;gap:8px">
           <button id="btn-disc" onclick="notionDisc()" class="btn" style="background:#EF454A22;color:#EF454A;border:1px solid #EF454A44;display:none">Déconnecter</button>
           <button onclick="notionSave()" id="save-btn" class="btn" style="flex:1">💾 Sauvegarder</button>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:12px">
+        <div class="sct" style="margin-bottom:12px">📋 Colonnes Notion (copier exactement)</div>
+        <div style="font-size:12px;color:#8896AA;margin-bottom:12px;line-height:1.6">
+          Créez ces colonnes dans votre base Notion avec les noms <strong style="color:#E8EDF5">exacts</strong> ci-dessous :
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;background:#0C1017;border-radius:8px;overflow:hidden;border:1px solid #252D3A">
+            <div style="padding:8px 12px;font-size:11px;font-weight:700;color:#3772FF;background:#3772FF0D;border-bottom:1px solid #252D3A;border-right:1px solid #252D3A">NOM DE LA COLONNE</div>
+            <div style="padding:8px 12px;font-size:11px;font-weight:700;color:#3772FF;background:#3772FF0D;border-bottom:1px solid #252D3A">TYPE NOTION</div>
+          </div>
+          <div id="notion-cols"></div>
         </div>
       </div>
       <div class="card">
@@ -551,10 +561,10 @@ function getDir(){var b=document.getElementById("btn-buy");return b&&b.style.col
 function getSess(dt){
   if(!dt)return"";
   var h=new Date(dt).getUTCHours();
-  if(h>=7&&h<9)return"🔀 Overlap Tokyo/Londres";
-  if(h>=12&&h<16)return"🔀 Overlap Londres/NY";
-  if(h<9)return"🇯🇵 Tokyo";if(h<12)return"🇬🇧 Londres";
-  if(h<21)return"🇺🇸 New York";return"🌙 Creux";
+  if(h>=0&&h<12)return"Asie";
+  if(h>=7&&h<16)return"Londres";
+  if(h>=12&&h<21)return"New York";
+  return"Asie";
 }
 function getDur(e,s){
   if(!e||!s)return"";var d=new Date(s)-new Date(e);if(d<=0)return"";
@@ -710,7 +720,40 @@ function deleteTrade(id){
 }
 
 // ── CONFIG ──
+function renderNotionCols(){
+  var cols=[
+    ["Paire","Title (Titre) ← colonne principale"],
+    ["Direction","Select — options: BUY, SELL"],
+    ["Stratégie","Select — options: Continuation, Retournement"],
+    ["Session","Select — options: Asie, Londres, New York"],
+    ["Date Entrée","Date"],
+    ["Date Sortie","Date"],
+    ["Durée","Text (Texte)"],
+    ["Risque (%)","Number (Nombre)"],
+    ["P&L (%)","Number (Nombre)"],
+    ["P&L ($)","Number (Nombre)"],
+    ["Score","Number (Nombre)"],
+    ["Émotion","Text (Texte)"],
+    ["Notes","Text (Texte)"],
+    ["Zone Clé","Checkbox"],
+    ["Sweep","Checkbox"],
+    ["BOS/CHoCH","Checkbox"],
+    ["FVG","Checkbox"],
+    ["Inducement","Checkbox"],
+  ];
+  var html=cols.map(function(r,i){
+    var bg=i%2===0?"#0C1017":"#111820";
+    return'<div style="display:grid;grid-template-columns:1fr 1fr;background:'+bg+';border-radius:0;border-bottom:1px solid #1C2333">'
+      +'<div style="padding:8px 12px;font-size:13px;font-weight:600;color:#E8EDF5;border-right:1px solid #1C2333">'+r[0]+'</div>'
+      +'<div style="padding:8px 12px;font-size:12px;color:#8896AA">'+r[1]+'</div>'
+      +'</div>';
+  }).join("");
+  document.getElementById("notion-cols").innerHTML='<div style="border-radius:8px;overflow:hidden;border:1px solid #252D3A">'+html+'</div>';
+  document.getElementById("notion-cols").querySelector("div").style.borderRadius="8px";
+}
+
 function renderCfg(){
+  renderNotionCols();
   document.getElementById("cfg-nt").value=nt;
   document.getElementById("cfg-nd").value=nd;
   document.getElementById("save-btn").style.background="linear-gradient(135deg,"+jcol+","+jcol+"BB)";
