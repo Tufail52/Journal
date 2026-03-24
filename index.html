@@ -70,7 +70,7 @@ select option{background:#151921}
   <button class="nb" id="nb-hist" onclick="showTab('hist')" title="Historique"><span>📋</span><span class="nl">Histor.</span></button>
   <button class="nb" id="nb-cfg" onclick="showTab('cfg')" title="Paramètres"><span>⚙️</span><span class="nl">Config</span></button>
   <div style="flex:1"></div>
-  <div id="notion-dot" title="Notion" style="width:10px;height:10px;border-radius:50%;background:#3D4D63;margin-bottom:4px"></div>
+  <div id="sb-dot" title="Supabase" style="width:10px;height:10px;border-radius:50%;background:#3D4D63;margin-bottom:4px"></div>
 </nav>
 <!-- Content -->
 <div class="ct">
@@ -145,21 +145,12 @@ select option{background:#151921}
 
       <div class="card" style="margin-bottom:10px">
         <div class="sct" style="margin-bottom:12px">🧠 Stratégie & Psychologie</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-          <div><label class="lbl">Stratégie</label>
+        <div style="margin-bottom:12px">
+          <label class="lbl">Stratégie</label>
             <select id="f-strat" class="inp" style="cursor:pointer">
               <option value="">— Choisir —</option>
               <option>Continuation</option><option>Retournement</option>
             </select>
-          </div>
-          <div><label class="lbl">Émotion</label>
-            <select id="f-emo" class="inp" style="cursor:pointer">
-              <option value="">— Choisir —</option>
-              <option>😎 Confiant</option><option>😐 Neutre</option><option>😰 Stressé</option>
-              <option>🤑 Euphorique</option><option>😨 Craintif</option><option>😤 Frustré</option>
-              <option>🧘 Discipliné</option><option>😴 Fatigué</option>
-            </select>
-          </div>
         </div>
         <label class="lbl" style="margin-bottom:8px">Confluences</label>
         <div id="conf-list"></div>
@@ -167,8 +158,7 @@ select option{background:#151921}
           <span style="font-size:12px;color:#8896AA">Score de confluences</span>
           <span id="score-val" style="font-size:14px;font-weight:700"></span>
         </div>
-        <label class="lbl">Notes</label>
-        <textarea id="f-notes" class="inp" rows="3" placeholder="Leçons apprises..." style="resize:vertical;line-height:1.6"></textarea>
+
       </div>
 
       <div class="card" style="margin-bottom:10px">
@@ -224,32 +214,27 @@ select option{background:#151921}
 
     <!-- PARAMÈTRES -->
     <div id="t-cfg" class="page">
-      <div class="card" style="margin-bottom:12px">
-        <div class="sct" style="margin-bottom:12px">🔗 Connexion Notion</div>
-        <div id="notion-status" style="border-radius:8px;padding:10px 13px;margin-bottom:12px;font-size:13px;font-weight:600"></div>
-        <label class="lbl">Token d'intégration</label>
-        <input type="password" id="cfg-nt" class="inp" placeholder="secret_xxxxxxxxxxxx" style="margin-bottom:10px"/>
-        <label class="lbl">Database ID</label>
-        <input type="text" id="cfg-nd" class="inp" placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" style="margin-bottom:12px"/>
-        <div style="background:#0C1017;border-radius:8px;padding:10px 13px;margin-bottom:12px;font-size:12px;color:#8896AA;line-height:1.7">
-          💡 Chaque journal a son propre Database ID Notion. Créez 3 bases séparées.
-        </div>
-        <div style="display:flex;gap:8px">
-          <button id="btn-disc" onclick="notionDisc()" class="btn" style="background:#EF454A22;color:#EF454A;border:1px solid #EF454A44;display:none">Déconnecter</button>
-          <button onclick="notionSave()" id="save-btn" class="btn" style="flex:1">💾 Sauvegarder</button>
+
+
         </div>
       </div>
       <div class="card" style="margin-bottom:12px">
-        <div class="sct" style="margin-bottom:12px">📋 Colonnes Notion (copier exactement)</div>
-        <div style="font-size:12px;color:#8896AA;margin-bottom:12px;line-height:1.6">
-          Créez ces colonnes dans votre base Notion avec les noms <strong style="color:#E8EDF5">exacts</strong> ci-dessous :
+        <div class="sct" style="margin-bottom:12px">🔌 Connexion Supabase</div>
+        <div id="sb-status" style="border-radius:8px;padding:10px 13px;margin-bottom:12px;font-size:13px;font-weight:600;background:#3772FF0D;border:1px solid #3772FF28;color:#3772FF">
+          🔌 Entrez vos identifiants Supabase pour activer la sync automatique
         </div>
-        <div style="display:flex;flex-direction:column;gap:6px">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;background:#0C1017;border-radius:8px;overflow:hidden;border:1px solid #252D3A">
-            <div style="padding:8px 12px;font-size:11px;font-weight:700;color:#3772FF;background:#3772FF0D;border-bottom:1px solid #252D3A;border-right:1px solid #252D3A">NOM DE LA COLONNE</div>
-            <div style="padding:8px 12px;font-size:11px;font-weight:700;color:#3772FF;background:#3772FF0D;border-bottom:1px solid #252D3A">TYPE NOTION</div>
-          </div>
-          <div id="notion-cols"></div>
+        <label class="lbl">Supabase URL</label>
+        <input type="text" id="sb-url" class="inp" placeholder="https://xxxx.supabase.co" style="margin-bottom:10px"/>
+        <label class="lbl">Supabase Anon Key</label>
+        <input type="text" id="sb-key" class="inp" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." style="margin-bottom:12px"/>
+        <label class="lbl">Nom de la table</label>
+        <input type="text" id="sb-table" class="inp" placeholder="trades" style="margin-bottom:14px"/>
+        <div style="background:#0C1017;border-radius:8px;padding:10px 13px;margin-bottom:14px;font-size:12px;color:#8896AA;line-height:1.7">
+          💡 Rendez-vous sur <strong style="color:#E8EDF5">supabase.com</strong> → votre projet → Settings → API pour récupérer ces informations.
+        </div>
+        <div style="display:flex;gap:8px">
+          <button id="sb-disc-btn" onclick="supaDisc()" class="btn" style="background:#EF454A22;color:#EF454A;border:1px solid #EF454A44;display:none">Déconnecter</button>
+          <button onclick="supaSave()" id="sb-save-btn" class="btn" style="flex:1">💾 Sauvegarder</button>
         </div>
       </div>
       <div class="card">
@@ -288,7 +273,7 @@ var CONF_DEF=[
 
 // ── State ──
 var jid=null,jcol="#3772FF",jname="",jemoji="📘";
-var trades=[],nt="",nd="",editId=null;
+var trades=[],editId=null;
 var conf={r_zone:false,r_sweep:false,r_bos:false,r_fvg:false,r_inducement:false};
 var imgEntry=null,imgExit=null,imgEntryName="",imgExitName="";
 
@@ -361,15 +346,18 @@ function renderHome(){
 function openJournal(id,n,col,emo){
   jid=id;jname=n;jcol=col;jemoji=emo;
   var v=ls("t-"+id);trades=v?JSON.parse(v):[];
-  var nv=ls("n-"+id);nt="";nd="";
-  if(nv){try{var c=JSON.parse(nv);nt=c.t||"";nd=c.d||"";}catch(e){}}
+  // supabase loaded in renderCfg
   document.getElementById("hdr-name").textContent=n;
   document.getElementById("hdr-emo").textContent=emo;
   document.getElementById("sb-emo").textContent=emo;
   document.getElementById("sb-emo").style.background=col+"18";
   document.getElementById("sb-emo").style.border="1.5px solid "+col+"35";
-  document.getElementById("notion-dot").style.background=nt&&nd?"#00C087":"#3D4D63";
+  
   document.getElementById("btn-new").style.background="linear-gradient(135deg,"+col+","+col+"BB)";
+  // Update supabase dot
+  var sbcfg2=null;try{var sv2=ls("sb-"+id);if(sv2)sbcfg2=JSON.parse(sv2);}catch(e){}
+  var sbConn=!!(sbcfg2&&sbcfg2.url&&sbcfg2.key);
+  document.getElementById("sb-dot").style.background=sbConn?"#00C087":"#3D4D63";
   document.getElementById("sidebar").style.cssText+="--jcol:"+col;
   showPage("p-journal");
   showTab("dash");
@@ -606,7 +594,7 @@ function clearForm(){
   document.getElementById("f-entry").value="";document.getElementById("f-exit").value="";
   document.getElementById("f-risk").value="";document.getElementById("f-pnl").value="";
   document.getElementById("f-amt").value="";document.getElementById("f-strat").value="";
-  document.getElementById("f-emo").value="";document.getElementById("f-notes").value="";
+
   document.getElementById("session-box").style.display="none";
   document.getElementById("dur-box").style.display="none";
   document.getElementById("fe-name").textContent="Ajouter";
@@ -626,8 +614,8 @@ function submitForm(){
     entryDate:entry,exitDate:document.getElementById("f-exit").value,
     session:getSess(entry),riskPercent:document.getElementById("f-risk").value,
     pnlPercent:document.getElementById("f-pnl").value,pnlAmount:document.getElementById("f-amt").value,
-    strategy:document.getElementById("f-strat").value,emotion:document.getElementById("f-emo").value,
-    notes:document.getElementById("f-notes").value,
+    strategy:document.getElementById("f-strat").value,
+    emotion:"", notes:"",
     r_zone:conf.r_zone,r_sweep:conf.r_sweep,r_bos:conf.r_bos,r_fvg:conf.r_fvg,r_inducement:conf.r_inducement,
     screenshotEntry:imgEntry,screenshotEntryName:imgEntryName,
     screenshotExit:imgExit,screenshotExitName:imgExitName};
@@ -636,7 +624,7 @@ function submitForm(){
   lss("t-"+jid,JSON.stringify(trades));
   toast(editId?"Mis à jour ✓":"Trade enregistré ✓",true);
   clearForm();showTab("hist");
-  if(nt&&nd)syncNotion(t);
+  syncSupabase(t);
 }
 
 // ── DÉTAIL ──
@@ -700,8 +688,7 @@ function editTrade(id){
     document.getElementById("f-pnl").value=t.pnlPercent||"";
     document.getElementById("f-amt").value=t.pnlAmount||"";
     document.getElementById("f-strat").value=t.strategy||"";
-    document.getElementById("f-emo").value=t.emotion||"";
-    document.getElementById("f-notes").value=t.notes||"";
+
     conf={r_zone:!!t.r_zone,r_sweep:!!t.r_sweep,r_bos:!!t.r_bos,r_fvg:!!t.r_fvg,r_inducement:!!t.r_inducement};
     imgEntry=t.screenshotEntry||null;imgEntryName=t.screenshotEntryName||"";
     imgExit=t.screenshotExit||null;imgExitName=t.screenshotExitName||"";
@@ -720,48 +707,24 @@ function deleteTrade(id){
 }
 
 // ── CONFIG ──
-function renderNotionCols(){
-  var cols=[
-    ["Paire","Title (Titre) ← colonne principale"],
-    ["Direction","Select — options: BUY, SELL"],
-    ["Stratégie","Select — options: Continuation, Retournement"],
-    ["Session","Select — options: Asie, Londres, New York"],
-    ["Date Entrée","Date"],
-    ["Date Sortie","Date"],
-    ["Durée","Text (Texte)"],
-    ["Risque (%)","Number (Nombre)"],
-    ["P&L (%)","Number (Nombre)"],
-    ["P&L ($)","Number (Nombre)"],
-    ["Score","Number (Nombre)"],
-    ["Émotion","Text (Texte)"],
-    ["Notes","Text (Texte)"],
-    ["Zone Clé","Checkbox"],
-    ["Sweep","Checkbox"],
-    ["BOS/CHoCH","Checkbox"],
-    ["FVG","Checkbox"],
-    ["Inducement","Checkbox"],
-  ];
-  var html=cols.map(function(r,i){
-    var bg=i%2===0?"#0C1017":"#111820";
-    return'<div style="display:grid;grid-template-columns:1fr 1fr;background:'+bg+';border-radius:0;border-bottom:1px solid #1C2333">'
-      +'<div style="padding:8px 12px;font-size:13px;font-weight:600;color:#E8EDF5;border-right:1px solid #1C2333">'+r[0]+'</div>'
-      +'<div style="padding:8px 12px;font-size:12px;color:#8896AA">'+r[1]+'</div>'
-      +'</div>';
-  }).join("");
-  document.getElementById("notion-cols").innerHTML='<div style="border-radius:8px;overflow:hidden;border:1px solid #252D3A">'+html+'</div>';
-  document.getElementById("notion-cols").querySelector("div").style.borderRadius="8px";
-}
-
 function renderCfg(){
-  renderNotionCols();
-  document.getElementById("cfg-nt").value=nt;
-  document.getElementById("cfg-nd").value=nd;
-  document.getElementById("save-btn").style.background="linear-gradient(135deg,"+jcol+","+jcol+"BB)";
-  document.getElementById("btn-disc").style.display=nt&&nd?"inline-block":"none";
-  var ns=document.getElementById("notion-status");
-  if(nt&&nd){ns.style.background="#00C0870F";ns.style.border="1px solid #00C08728";ns.style.color="#00C087";ns.textContent="✅ Notion connecté — sync auto activée";}
-  else{ns.style.background="#3772FF0D";ns.style.border="1px solid #3772FF28";ns.style.color="#3772FF";ns.textContent="🔗 Entrez vos identifiants Notion";}
-  document.getElementById("notion-dot").style.background=nt&&nd?"#00C087":"#3D4D63";
+  // Supabase config
+  var sbcfg=null;try{var sv=ls("sb-"+jid);if(sv)sbcfg=JSON.parse(sv);}catch(e){}
+  var sbUrl=sbcfg&&sbcfg.url?sbcfg.url:"";
+  var sbKey=sbcfg&&sbcfg.key?sbcfg.key:"";
+  var sbTable=sbcfg&&sbcfg.table?sbcfg.table:"trades";
+  var sbConnected=!!(sbUrl&&sbKey);
+  if(document.getElementById("sb-url"))document.getElementById("sb-url").value=sbUrl;
+  if(document.getElementById("sb-key"))document.getElementById("sb-key").value=sbKey;
+  if(document.getElementById("sb-table"))document.getElementById("sb-table").value=sbTable;
+  if(document.getElementById("sb-save-btn"))document.getElementById("sb-save-btn").style.background="linear-gradient(135deg,"+jcol+","+jcol+"BB)";
+  if(document.getElementById("sb-disc-btn"))document.getElementById("sb-disc-btn").style.display=sbConnected?"inline-block":"none";
+  var sbs=document.getElementById("sb-status");
+  if(sbs){
+    if(sbConnected){sbs.style.background="#00C0870F";sbs.style.border="1px solid #00C08728";sbs.style.color="#00C087";sbs.textContent="✅ Supabase connecté — sync auto activée";}
+    else{sbs.style.background="#3772FF0D";sbs.style.border="1px solid #3772FF28";sbs.style.color="#3772FF";sbs.textContent="🔌 Entrez vos identifiants Supabase";}
+  }
+  if(document.getElementById("sb-dot"))document.getElementById("sb-dot").style.background=sbConnected?"#00C087":"#3D4D63";
 
   var pnls=trades.map(function(t){return parseFloat(t.pnlPercent)||0;});
   var wins=pnls.filter(function(p){return p>0;});
@@ -781,22 +744,49 @@ function renderCfg(){
   }).join("");
 }
 
-function notionSave(){
-  nt=document.getElementById("cfg-nt").value;nd=document.getElementById("cfg-nd").value;
-  lss("n-"+jid,JSON.stringify({t:nt,d:nd}));toast("Sauvegardé ✓",true);renderCfg();
+function supaSave(){
+  var url=document.getElementById("sb-url").value.trim();
+  var key=document.getElementById("sb-key").value.trim();
+  var table=document.getElementById("sb-table").value.trim()||"trades";
+  lss("sb-"+jid,JSON.stringify({url:url,key:key,table:table}));
+  toast("Supabase sauvegardé ✓",true);renderCfg();
 }
-function notionDisc(){nt="";nd="";lss("n-"+jid,JSON.stringify({t:"",d:""}));toast("Notion déconnecté",true);renderCfg();}
+function supaDisc(){
+  lss("sb-"+jid,JSON.stringify({url:"",key:"",table:""}));
+  toast("Supabase déconnecté",true);renderCfg();
+}
 
-async function syncNotion(trade){
+async function syncSupabase(trade){
+  var cfg=ls("sb-"+jid);if(!cfg)return;
+  var sb;try{sb=JSON.parse(cfg);}catch(e){return;}
+  if(!sb.url||!sb.key)return;
+  var table=sb.table||"trades";
+  var row={
+    journal:jid, pair:trade.pair, direction:trade.direction,
+    session:trade.session||"", strategy:trade.strategy||"",
+    entry_date:trade.entryDate||null, exit_date:trade.exitDate||null,
+    duration:getDur(trade.entryDate,trade.exitDate)||null,
+    risk_pct:parseFloat(trade.riskPercent)||null,
+    pnl_pct:parseFloat(trade.pnlPercent)||null,
+    pnl_usd:parseFloat(trade.pnlAmount)||null,
+    score_conf:CONF_DEF.filter(function(cf){return trade[cf.key];}).length,
+    r_zone:!!trade.r_zone, r_sweep:!!trade.r_sweep, r_bos:!!trade.r_bos,
+    r_fvg:!!trade.r_fvg, r_inducement:!!trade.r_inducement,
+    created_at:new Date().toISOString()
+  };
   try{
-    var sc=CONF_DEF.filter(function(c){return trade[c.key];}).length;
-    var pr={"Paire":{title:[{text:{content:trade.pair||""}}]},"Direction":{select:{name:trade.direction||"BUY"}},"Session":{rich_text:[{text:{content:trade.session||""}}]},"Score":{number:sc}};
-    if(trade.pnlPercent)pr["P&L (%)"]={number:parseFloat(trade.pnlPercent)};
-    if(trade.strategy)pr["Stratégie"]={select:{name:trade.strategy}};
-    if(trade.entryDate)pr["Date Entrée"]={date:{start:new Date(trade.entryDate).toISOString()}};
-    var res=await fetch("https://api.notion.com/v1/pages",{method:"POST",headers:{"Authorization":"Bearer "+nt,"Content-Type":"application/json","Notion-Version":"2022-06-28"},body:JSON.stringify({parent:{database_id:nd},properties:pr})});
-    toast(res.ok?"Notion ✓":"Erreur Notion",res.ok);
-  }catch(e){toast("Notion: erreur",false);}
+    var res=await fetch(sb.url+"/rest/v1/"+table,{
+      method:"POST",
+      headers:{
+        "apikey":sb.key,
+        "Authorization":"Bearer "+sb.key,
+        "Content-Type":"application/json",
+        "Prefer":"return=minimal"
+      },
+      body:JSON.stringify(row)
+    });
+    toast(res.ok?"Supabase sync ✓":"Erreur Supabase "+res.status, res.ok);
+  }catch(e){toast("Supabase: connexion impossible",false);}
 }
 
 // ── INIT ──
