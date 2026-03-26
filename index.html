@@ -219,22 +219,24 @@ select option{background:#151921}
         </div>
       </div>
       <div class="card" style="margin-bottom:12px">
-        <div class="sct" style="margin-bottom:12px">🔌 Connexion Supabase</div>
-        <div id="sb-status" style="border-radius:8px;padding:10px 13px;margin-bottom:12px;font-size:13px;font-weight:600;background:#3772FF0D;border:1px solid #3772FF28;color:#3772FF">
-          🔌 Entrez vos identifiants Supabase pour activer la sync automatique
+        <div class="sct" style="margin-bottom:12px">📊 Connexion Google Sheets</div>
+        <div id="gs-status" style="border-radius:8px;padding:10px 13px;margin-bottom:14px;font-size:13px;font-weight:600;background:#1AA2601A;border:1px solid #1AA26028;color:#1AA260">
+          📊 Entrez l'URL de votre Google Apps Script
         </div>
-        <label class="lbl">Supabase URL</label>
-        <input type="text" id="sb-url" class="inp" placeholder="https://xxxx.supabase.co" style="margin-bottom:10px"/>
-        <label class="lbl">Supabase Anon Key</label>
-        <input type="text" id="sb-key" class="inp" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." style="margin-bottom:12px"/>
-        <label class="lbl">Nom de la table</label>
-        <input type="text" id="sb-table" class="inp" placeholder="trades" style="margin-bottom:14px"/>
-        <div style="background:#0C1017;border-radius:8px;padding:10px 13px;margin-bottom:14px;font-size:12px;color:#8896AA;line-height:1.7">
-          💡 Rendez-vous sur <strong style="color:#E8EDF5">supabase.com</strong> → votre projet → Settings → API pour récupérer ces informations.
+        <label class="lbl">URL du Script Web App</label>
+        <input type="text" id="gs-url" class="inp" placeholder="https://script.google.com/macros/s/XXXX/exec" style="margin-bottom:14px"/>
+        <div style="background:#0C1017;border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:#8896AA;line-height:1.8">
+          <div style="font-weight:700;color:#E8EDF5;margin-bottom:6px">📌 Comment configurer :</div>
+          <div>1. Ouvrez <strong style="color:#E8EDF5">Google Sheets</strong> → créez une feuille</div>
+          <div>2. Menu <strong style="color:#E8EDF5">Extensions → Apps Script</strong></div>
+          <div>3. Collez le code Apps Script fourni</div>
+          <div>4. Cliquez <strong style="color:#E8EDF5">Déployer → Nouvelle déploiement</strong></div>
+          <div>5. Type : <strong style="color:#E8EDF5">Application Web</strong> → Accès : <strong style="color:#E8EDF5">Tout le monde</strong></div>
+          <div>6. Copiez l'URL et collez-la ci-dessus</div>
         </div>
         <div style="display:flex;gap:8px">
-          <button id="sb-disc-btn" onclick="supaDisc()" class="btn" style="background:#EF454A22;color:#EF454A;border:1px solid #EF454A44;display:none">Déconnecter</button>
-          <button onclick="supaSave()" id="sb-save-btn" class="btn" style="flex:1">💾 Sauvegarder</button>
+          <button id="gs-disc-btn" onclick="gsDisc()" class="btn" style="background:#EF454A22;color:#EF454A;border:1px solid #EF454A44;display:none">Déconnecter</button>
+          <button onclick="gsSave()" id="gs-save-btn" class="btn" style="flex:1">💾 Sauvegarder</button>
         </div>
       </div>
       <div class="card">
@@ -355,9 +357,8 @@ function openJournal(id,n,col,emo){
   
   document.getElementById("btn-new").style.background="linear-gradient(135deg,"+col+","+col+"BB)";
   // Update supabase dot
-  var sbcfg2=null;try{var sv2=ls("sb-"+id);if(sv2)sbcfg2=JSON.parse(sv2);}catch(e){}
-  var sbConn=!!(sbcfg2&&sbcfg2.url&&sbcfg2.key);
-  document.getElementById("sb-dot").style.background=sbConn?"#00C087":"#3D4D63";
+  var gsConn=!!(ls("gs-"+id));
+  document.getElementById("sb-dot").style.background=gsConn?"#1AA260":"#3D4D63";
   document.getElementById("sidebar").style.cssText+="--jcol:"+col;
   showPage("p-journal");
   showTab("dash");
@@ -624,7 +625,7 @@ function submitForm(){
   lss("t-"+jid,JSON.stringify(trades));
   toast(editId?"Mis à jour ✓":"Trade enregistré ✓",true);
   clearForm();showTab("hist");
-  syncSupabase(t);
+  syncGoogleSheets(t);
 }
 
 // ── DÉTAIL ──
@@ -708,23 +709,18 @@ function deleteTrade(id){
 
 // ── CONFIG ──
 function renderCfg(){
-  // Supabase config
-  var sbcfg=null;try{var sv=ls("sb-"+jid);if(sv)sbcfg=JSON.parse(sv);}catch(e){}
-  var sbUrl=sbcfg&&sbcfg.url?sbcfg.url:"";
-  var sbKey=sbcfg&&sbcfg.key?sbcfg.key:"";
-  var sbTable=sbcfg&&sbcfg.table?sbcfg.table:"trades";
-  var sbConnected=!!(sbUrl&&sbKey);
-  if(document.getElementById("sb-url"))document.getElementById("sb-url").value=sbUrl;
-  if(document.getElementById("sb-key"))document.getElementById("sb-key").value=sbKey;
-  if(document.getElementById("sb-table"))document.getElementById("sb-table").value=sbTable;
-  if(document.getElementById("sb-save-btn"))document.getElementById("sb-save-btn").style.background="linear-gradient(135deg,"+jcol+","+jcol+"BB)";
-  if(document.getElementById("sb-disc-btn"))document.getElementById("sb-disc-btn").style.display=sbConnected?"inline-block":"none";
-  var sbs=document.getElementById("sb-status");
-  if(sbs){
-    if(sbConnected){sbs.style.background="#00C0870F";sbs.style.border="1px solid #00C08728";sbs.style.color="#00C087";sbs.textContent="✅ Supabase connecté — sync auto activée";}
-    else{sbs.style.background="#3772FF0D";sbs.style.border="1px solid #3772FF28";sbs.style.color="#3772FF";sbs.textContent="🔌 Entrez vos identifiants Supabase";}
+  // Google Sheets config
+  var gsUrl=ls("gs-"+jid)||"";
+  var gsConnected=!!gsUrl;
+  if(document.getElementById("gs-url"))document.getElementById("gs-url").value=gsUrl;
+  if(document.getElementById("gs-save-btn"))document.getElementById("gs-save-btn").style.background="linear-gradient(135deg,"+jcol+","+jcol+"BB)";
+  if(document.getElementById("gs-disc-btn"))document.getElementById("gs-disc-btn").style.display=gsConnected?"inline-block":"none";
+  var gss=document.getElementById("gs-status");
+  if(gss){
+    if(gsConnected){gss.style.background="#1AA2600F";gss.style.border="1px solid #1AA26028";gss.style.color="#1AA260";gss.textContent="✅ Google Sheets connecté — sync auto activée";}
+    else{gss.style.background="#1AA2600D";gss.style.border="1px solid #1AA26020";gss.style.color="#1AA260";gss.textContent="📊 Entrez l'URL de votre Google Apps Script";}
   }
-  if(document.getElementById("sb-dot"))document.getElementById("sb-dot").style.background=sbConnected?"#00C087":"#3D4D63";
+  if(document.getElementById("sb-dot"))document.getElementById("sb-dot").style.background=gsConnected?"#1AA260":"#3D4D63";
 
   var pnls=trades.map(function(t){return parseFloat(t.pnlPercent)||0;});
   var wins=pnls.filter(function(p){return p>0;});
@@ -744,49 +740,43 @@ function renderCfg(){
   }).join("");
 }
 
-function supaSave(){
-  var url=document.getElementById("sb-url").value.trim();
-  var key=document.getElementById("sb-key").value.trim();
-  var table=document.getElementById("sb-table").value.trim()||"trades";
-  lss("sb-"+jid,JSON.stringify({url:url,key:key,table:table}));
-  toast("Supabase sauvegardé ✓",true);renderCfg();
+function gsSave(){
+  var url=document.getElementById("gs-url").value.trim();
+  lss("gs-"+jid,url);
+  toast("Google Sheets sauvegardé ✓",true);renderCfg();
 }
-function supaDisc(){
-  lss("sb-"+jid,JSON.stringify({url:"",key:"",table:""}));
-  toast("Supabase déconnecté",true);renderCfg();
+function gsDisc(){
+  lss("gs-"+jid,"");
+  toast("Google Sheets déconnecté",true);renderCfg();
 }
 
-async function syncSupabase(trade){
-  var cfg=ls("sb-"+jid);if(!cfg)return;
-  var sb;try{sb=JSON.parse(cfg);}catch(e){return;}
-  if(!sb.url||!sb.key)return;
-  var table=sb.table||"trades";
+async function syncGoogleSheets(trade){
+  var url=ls("gs-"+jid);
+  if(!url)return;
   var row={
-    journal:jid, pair:trade.pair, direction:trade.direction,
-    session:trade.session||"", strategy:trade.strategy||"",
-    entry_date:trade.entryDate||null, exit_date:trade.exitDate||null,
-    duration:getDur(trade.entryDate,trade.exitDate)||null,
-    risk_pct:parseFloat(trade.riskPercent)||null,
-    pnl_pct:parseFloat(trade.pnlPercent)||null,
-    pnl_usd:parseFloat(trade.pnlAmount)||null,
+    journal:jid,
+    pair:trade.pair||"",
+    direction:trade.direction||"",
+    session:trade.session||"",
+    strategy:trade.strategy||"",
+    entry_date:trade.entryDate||"",
+    exit_date:trade.exitDate||"",
+    duration:getDur(trade.entryDate,trade.exitDate)||"",
+    risk_pct:trade.riskPercent||"",
+    pnl_pct:trade.pnlPercent||"",
+    pnl_usd:trade.pnlAmount||"",
     score_conf:CONF_DEF.filter(function(cf){return trade[cf.key];}).length,
-    r_zone:!!trade.r_zone, r_sweep:!!trade.r_sweep, r_bos:!!trade.r_bos,
-    r_fvg:!!trade.r_fvg, r_inducement:!!trade.r_inducement,
-    created_at:new Date().toISOString()
+    r_zone:trade.r_zone?true:false,
+    r_sweep:trade.r_sweep?true:false,
+    r_bos:trade.r_bos?true:false,
+    r_fvg:trade.r_fvg?true:false,
+    r_inducement:trade.r_inducement?true:false,
+    date_sync:new Date().toLocaleString("fr")
   };
   try{
-    var res=await fetch(sb.url+"/rest/v1/"+table,{
-      method:"POST",
-      headers:{
-        "apikey":sb.key,
-        "Authorization":"Bearer "+sb.key,
-        "Content-Type":"application/json",
-        "Prefer":"return=minimal"
-      },
-      body:JSON.stringify(row)
-    });
-    toast(res.ok?"Supabase sync ✓":"Erreur Supabase "+res.status, res.ok);
-  }catch(e){toast("Supabase: connexion impossible",false);}
+    await fetch(url+"?data="+encodeURIComponent(JSON.stringify(row)),{method:"GET",mode:"no-cors"});
+    toast("Google Sheets sync ✓",true);
+  }catch(e){toast("Google Sheets: erreur",false);}
 }
 
 // ── INIT ──
