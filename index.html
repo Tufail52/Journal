@@ -85,15 +85,29 @@ select option{background:#151921}
     <!-- DASHBOARD -->
     <div id="t-dash" class="page show">
       <div id="dash-stats" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px"></div>
-      <!-- Chart -->
-      <div class="card" style="margin-bottom:14px;padding:14px">
-        <div style="font-size:11px;font-weight:700;color:#8896AA;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">📈 Courbe de Capital</div>
-        <div id="chart-container" style="width:100%;height:120px"></div>
+      <!-- Charts row: donut + curve -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <!-- Donut Win/Loss -->
+        <div class="card" style="padding:14px;display:flex;flex-direction:column;align-items:center">
+          <div style="font-size:11px;font-weight:700;color:#8896AA;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;text-align:center">Win / Loss</div>
+          <div id="donut-container" style="width:100%;max-width:130px"></div>
+          <div id="donut-legend" style="margin-top:8px;font-size:11px;text-align:center"></div>
+        </div>
+        <!-- Courbe capital -->
+        <div class="card" style="padding:14px">
+          <div style="font-size:11px;font-weight:700;color:#8896AA;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">📈 Capital</div>
+          <div id="chart-container" style="width:100%;height:110px"></div>
+        </div>
       </div>
-      <!-- Barres -->
-      <div class="card" style="margin-bottom:14px;padding:14px">
-        <div style="font-size:11px;font-weight:700;color:#8896AA;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">📊 P&L par Trade</div>
-        <div id="bar-container" style="width:100%;height:80px"></div>
+      <!-- Barres P&L -->
+      <div class="card" style="margin-bottom:10px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:#8896AA;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">📊 P&L par Trade</div>
+        <div id="bar-container" style="width:100%;height:70px"></div>
+      </div>
+      <!-- Calendrier -->
+      <div class="card" style="margin-bottom:10px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:#8896AA;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">📅 Calendrier des Trades</div>
+        <div id="cal-container"></div>
       </div>
       <div id="dash-trades"></div>
     </div>
@@ -215,9 +229,7 @@ select option{background:#151921}
     <!-- PARAMÈTRES -->
     <div id="t-cfg" class="page">
 
-
-        </div>
-      </div>
+      <!-- Google Sheets - UNIQUEMENT ICI -->
       <div class="card" style="margin-bottom:12px">
         <div class="sct" style="margin-bottom:12px">📊 Connexion Google Sheets</div>
         <div id="gs-status" style="border-radius:8px;padding:10px 13px;margin-bottom:14px;font-size:13px;font-weight:600;background:#1AA2601A;border:1px solid #1AA26028;color:#1AA260">
@@ -239,10 +251,13 @@ select option{background:#151921}
           <button onclick="gsSave()" id="gs-save-btn" class="btn" style="flex:1">💾 Sauvegarder</button>
         </div>
       </div>
+
+      <!-- Statistiques -->
       <div class="card">
         <div class="sct" style="margin-bottom:12px">📊 Statistiques du Journal</div>
         <div id="cfg-stats" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
       </div>
+
     </div>
 
   </div>
@@ -421,6 +436,109 @@ function buildBarChart(){
 }
 
 // ── DASHBOARD ──
+function buildDonut(){
+  var w=trades.filter(function(t){return(parseFloat(t.pnlPercent)||0)>0;}).length;
+  var l=trades.filter(function(t){return(parseFloat(t.pnlPercent)||0)<0;}).length;
+  var n=w+l;
+  if(!n){
+    document.getElementById("donut-container").innerHTML='<div style="color:#3D4D63;font-size:11px;text-align:center;padding:20px 0">—</div>';
+    document.getElementById("donut-legend").innerHTML="";
+    return;
+  }
+  var wr=Math.round((w/n)*100);
+  var lr=100-wr;
+  // SVG donut
+  var R=44,r=28,cx=52,cy=52,W=104,H=104;
+  var fullC=2*Math.PI*R;
+  var wArc=fullC*(wr/100);
+  var lArc=fullC*(lr/100);
+  // win arc (start from top = -PI/2)
+  function arc(pct,col,offset){
+    var dash=fullC*(pct/100);
+    return '<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="none" stroke="'+col+'" stroke-width="'+(R-r)+'" stroke-dasharray="'+dash+' '+(fullC-dash)+'" stroke-dashoffset="'+offset+'" stroke-linecap="round"/>';
+  }
+  var startOff=-(fullC*0.25); // start from top
+  var wOff=startOff;
+  var lOff=startOff-fullC*(wr/100);
+  var svgW=w>0?arc(wr,"#00C087",wOff):"";
+  var svgL=l>0?arc(lr,"#EF454A",lOff):"";
+  var pct=document.getElementById("donut-container");
+  pct.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;display:block">'
+    +'<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="none" stroke="#1C2333" stroke-width="'+(R-r)+'"/>'
+    +svgW+svgL
+    +'<text x="'+cx+'" y="'+(cy+5)+'" text-anchor="middle" fill="#E8EDF5" font-size="16" font-weight="800">'+wr+'%</text>'
+    +'</svg>';
+  document.getElementById("donut-legend").innerHTML=
+    '<span style="color:#00C087;font-weight:700">'+w+' W</span>'
+    +' <span style="color:#3D4D63;margin:0 4px">·</span>'
+    +'<span style="color:#EF454A;font-weight:700">'+l+' L</span>';
+}
+
+function buildCalendar(){
+  if(!trades.length){
+    document.getElementById("cal-container").innerHTML='<div style="color:#3D4D63;font-size:12px;text-align:center;padding:12px 0">Aucun trade</div>';
+    return;
+  }
+  // Get unique months from trades
+  var monthMap={};
+  trades.forEach(function(t){
+    if(!t.entryDate)return;
+    var d=new Date(t.entryDate);
+    var key=d.getFullYear()+"-"+(d.getMonth()+1);
+    if(!monthMap[key])monthMap[key]={year:d.getFullYear(),month:d.getMonth(),trades:[]};
+    monthMap[key].trades.push(t);
+  });
+  // Show most recent month
+  var keys=Object.keys(monthMap).sort().reverse();
+  var latest=monthMap[keys[0]];
+  var yr=latest.year,mo=latest.month;
+  var monthNames=["Janv","Févr","Mars","Avr","Mai","Juin","Juil","Août","Sept","Oct","Nov","Déc"];
+  var dayNames=["Lu","Ma","Me","Je","Ve","Sa","Di"];
+  // Build day map for this month
+  var dayData={};
+  latest.trades.forEach(function(t){
+    var d=new Date(t.entryDate);
+    if(d.getMonth()===mo&&d.getFullYear()===yr){
+      var day=d.getDate();
+      if(!dayData[day])dayData[day]=[];
+      dayData[day].push(parseFloat(t.pnlPercent)||0);
+    }
+  });
+  // First day of month (0=Sun→adjust to Mon=0)
+  var first=new Date(yr,mo,1).getDay();
+  first=(first===0)?6:first-1;
+  var daysInMonth=new Date(yr,mo+1,0).getDate();
+  var html='<div style="font-size:12px;font-weight:700;color:#E8EDF5;text-align:center;margin-bottom:8px">'+monthNames[mo]+' '+yr+'</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px">';
+  dayNames.forEach(function(d){html+='<div style="font-size:9px;color:#3D4D63;text-align:center;padding:3px 0;font-weight:600">'+d+'</div>';});
+  // Empty cells before first day
+  for(var i=0;i<first;i++)html+='<div></div>';
+  // Days
+  for(var d=1;d<=daysInMonth;d++){
+    var dd=dayData[d];
+    var bg='transparent',border='1px solid #1C2333',color='#3D4D63';
+    var dot='';
+    if(dd&&dd.length){
+      var tot=dd.reduce(function(a,b){return a+b;},0);
+      var hasWin=dd.some(function(p){return p>0;});
+      var hasLoss=dd.some(function(p){return p<0;});
+      if(hasWin&&hasLoss){bg='#F5A6231A';border='1px solid #F5A62340';color='#F5A623';}
+      else if(hasWin){bg='#00C0871A';border='1px solid #00C08740';color='#00C087';}
+      else{bg='#EF454A1A';border='1px solid #EF454A40';color='#EF454A';}
+      dot='<div style="font-size:8px;color:'+color+';font-weight:700">'+(tot>=0?"+":"")+tot.toFixed(1)+'%</div>';
+    }
+    html+='<div style="background:'+bg+';border:'+border+';border-radius:6px;padding:4px 2px;text-align:center;min-height:36px;display:flex;flex-direction:column;align-items:center;justify-content:center">'
+      +'<div style="font-size:11px;color:'+color+';font-weight:600">'+d+'</div>'
+      +dot+'</div>';
+  }
+  html+='</div>';
+  // Month navigation hint
+  if(keys.length>1){
+    html+='<div style="font-size:11px;color:#3D4D63;text-align:center;margin-top:8px">'+trades.length+' trades au total · '+keys.length+' mois</div>';
+  }
+  document.getElementById("cal-container").innerHTML=html;
+}
+
 function renderDash(){
   var pnls=trades.map(function(t){return parseFloat(t.pnlPercent)||0;});
   var wins=pnls.filter(function(p){return p>0;});
@@ -447,6 +565,8 @@ function renderDash(){
 
   document.getElementById("chart-container").innerHTML=buildCurveChart();
   document.getElementById("bar-container").innerHTML=buildBarChart();
+  buildDonut();
+  buildCalendar();
 
   var rows="";
   if(!n){
@@ -622,10 +742,11 @@ function submitForm(){
     screenshotExit:imgExit,screenshotExitName:imgExitName};
   if(editId){trades=trades.map(function(x){return x.id===editId?t:x;});}
   else{trades.unshift(t);}
+  var wasEdit = !!editId;
   lss("t-"+jid,JSON.stringify(trades));
-  toast(editId?"Mis à jour ✓":"Trade enregistré ✓",true);
+  toast(wasEdit?"Mis à jour ✓":"Trade enregistré ✓",true);
   clearForm();showTab("hist");
-  syncGoogleSheets(t);
+  syncGoogleSheets(t, wasEdit?"update":"insert");
 }
 
 // ── DÉTAIL ──
@@ -702,9 +823,12 @@ function editTrade(id){
 }
 
 function deleteTrade(id){
+  var trade=null;
+  trades.forEach(function(t){if(t.id===id)trade=t;});
   trades=trades.filter(function(t){return t.id!==id;});
   lss("t-"+jid,JSON.stringify(trades));
   toast("Trade supprimé",true);goHist();
+  if(trade)syncGoogleSheets(trade,"delete");
 }
 
 // ── CONFIG ──
@@ -750,32 +874,40 @@ function gsDisc(){
   toast("Google Sheets déconnecté",true);renderCfg();
 }
 
-async function syncGoogleSheets(trade){
+async function syncGoogleSheets(trade, action){
   var url=ls("gs-"+jid);
   if(!url)return;
+  // action = "insert" or "update"
+  var act = action||"insert";
   var row={
-    journal:jid,
-    pair:trade.pair||"",
-    direction:trade.direction||"",
-    session:trade.session||"",
-    strategy:trade.strategy||"",
-    entry_date:trade.entryDate||"",
-    exit_date:trade.exitDate||"",
-    duration:getDur(trade.entryDate,trade.exitDate)||"",
-    risk_pct:trade.riskPercent||"",
-    pnl_pct:trade.pnlPercent||"",
-    pnl_usd:trade.pnlAmount||"",
-    score_conf:CONF_DEF.filter(function(cf){return trade[cf.key];}).length,
-    r_zone:trade.r_zone?true:false,
-    r_sweep:trade.r_sweep?true:false,
-    r_bos:trade.r_bos?true:false,
-    r_fvg:trade.r_fvg?true:false,
-    r_inducement:trade.r_inducement?true:false,
-    date_sync:new Date().toLocaleString("fr")
+    action: act,
+    trade_id: trade.id,
+    journal: jid,
+    pair: trade.pair||"",
+    direction: trade.direction||"",
+    session: trade.session||"",
+    strategy: trade.strategy||"",
+    entry_date: trade.entryDate||"",
+    exit_date: trade.exitDate||"",
+    duration: getDur(trade.entryDate,trade.exitDate)||"",
+    risk_pct: trade.riskPercent||"",
+    pnl_pct: trade.pnlPercent||"",
+    pnl_usd: trade.pnlAmount||"",
+    score_conf: CONF_DEF.filter(function(cf){return trade[cf.key];}).length,
+    r_zone: trade.r_zone?true:false,
+    r_sweep: trade.r_sweep?true:false,
+    r_bos: trade.r_bos?true:false,
+    r_fvg: trade.r_fvg?true:false,
+    r_inducement: trade.r_inducement?true:false,
+    has_screenshot_entry: trade.screenshotEntry?"Oui":"Non",
+    has_screenshot_exit: trade.screenshotExit?"Oui":"Non",
+    date_sync: new Date().toLocaleString("fr")
   };
   try{
     await fetch(url+"?data="+encodeURIComponent(JSON.stringify(row)),{method:"GET",mode:"no-cors"});
-    toast("Google Sheets sync ✓",true);
+    if(act==="delete") toast("Supprimé de Google Sheets ✓",true);
+    else if(act==="update") toast("Google Sheets mis à jour ✓",true);
+    else toast("Google Sheets sync ✓",true);
   }catch(e){toast("Google Sheets: erreur",false);}
 }
 
